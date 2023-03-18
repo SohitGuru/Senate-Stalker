@@ -1,0 +1,4 @@
+(library
+ (name senate)
+ (public_name SenateStalker)
+ (libraries yojson ANSITerminal))
