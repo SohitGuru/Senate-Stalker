@@ -18,7 +18,7 @@ publish: false
 
 title: "Senate Stalker"
 # OK if this is a Cornell Github link, but public gallery viewers won't be able to see it.
-git-repo: "https://github.com/cs3110/textbook"
+git-repo: "https://github.coecis.cornell.edu/sg857/Keaton-Camels"
 # If you have no demo screencast, replace the url string with an empty string ""
 demo-video-url: ""
 # Write a short, attention-grabbing description of your project.
