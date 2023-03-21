@@ -1,0 +1,33 @@
+---
+# Members of your group.
+group:
+  - name: Arjun Khanna
+    netid: ak2243
+  - name: Dayana Soria Lopez
+    netid: dns64
+  - name: Jordan Rudolph
+    netid: jmr489
+  - name: Sohit Gurung
+    netid: sg857
+
+pm:
+  name: Shreya Ponugoti
+  netid: sp843
+
+publish: false
+
+title: "Senate Stalker"
+# OK if this is a Cornell Github link, but public gallery viewers won't be able to see it.
+git-repo: "https://github.com/cs3110/textbook"
+# If you have no demo screencast, replace the url string with an empty string ""
+demo-video-url: ""
+# Write a short, attention-grabbing description of your project.
+desc: >
+  This project provides information to a client about a given United States 
+  senator. Information about the senator would include voting records, speeches,
+  social media posts, campaign donors, etc. Most of the information we will 
+  retrieve for the specified politician will involve us utilizing OCaml web 
+  scraping libraries (Mechaml) and working with JSON. Essentially, the program 
+  will put the information on the politician into a markdown file. As a stretch 
+  goal, we can implement a GUI interface for the politician lookup and 
+  information output.
