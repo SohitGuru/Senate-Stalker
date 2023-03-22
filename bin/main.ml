@@ -1,4 +1,6 @@
-(* [run_stalking s] starts the web scraping of Senator*)
+open Senate
+open Command
+
 let run_stalking s = raise (Failure "Error!")
 
 let help_message =
@@ -11,8 +13,7 @@ let help_message =
   \    committees\n"
 
 let prompt = "> "
-let handle cmd = ""
-(* TODO: the above needs to be implemented *)
+let handle cmd = cmd |> Command.parse |> Executor.execute |> String.concat "\n"
 
 let rec prompter () =
   print_string prompt;
@@ -26,7 +27,8 @@ let rec prompter () =
 (** [main ()] prompts for the Senator name, then starts finding information
     about said Senator. *)
 let main () =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
+  ANSITerminal.print_string
+    [ ANSITerminal.blue; ANSITerminal.Bold ]
     "\n\nSenate Stalker: Learn more about our Senators!\n";
   ANSITerminal.print_string [ ANSITerminal.yellow ] help_message;
   prompter ();
