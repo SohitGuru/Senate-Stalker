@@ -23,11 +23,11 @@ git-repo: "https://github.coecis.cornell.edu/sg857/Keaton-Camels"
 demo-video-url: ""
 # Write a short, attention-grabbing description of your project.
 desc: >
-  This project provides information to a client about a given United States 
-  senator. Information about the senator would include voting records, speeches,
-  social media posts, campaign donors, etc. Most of the information we will 
-  retrieve for the specified politician will involve us utilizing OCaml web 
-  scraping libraries (Mechaml) and working with JSON. Essentially, the program 
-  will put the information on the politician into a markdown file. As a stretch 
-  goal, we can implement a GUI interface for the politician lookup and 
+  Our project provides information to a client about a given United States 
+  senator! Information about the senator would include voting records, speeches,
+  social media posts, and campaign donors will be fetched and provided to the client.
+  Most of the information we will retrieve for the specified politician will involve 
+  us utilizing OCaml web scraping libraries (Mechaml) and working with JSON. 
+  Essentially, the program will put the information on the politician into a markdown file. 
+  As a stretch goal, we plan on implementing a GUI interface for the politician lookup and 
   information output.
