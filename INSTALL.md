@@ -1,4 +1,12 @@
+# **System Requirements**
+
+Run this program on OCaml version 4.14.0
+
+
 ***Install Guides***
 
+Make sure to have the ocaml graphics and mechaml modules installed!
 
-Make sure to install ocaml graphics and mechaml modules
+## How to start the Stalking:
+
+<span style="color:red">Type make run in your terminal to get started!</span>
