@@ -37,7 +37,51 @@ module type Parser = sig
   val exec : input -> return
 end
 
-module Committees : Parser = struct
+module Members :
+  Parser with type return = Member.t list with type input = unit = struct
+  let url =
+    "https://www.senate.gov/general/contact_information/senators_cfm.xml"
+
+  type return = Member.t list
+  type input = unit
+
+  let extract_field senate_xml_list pos : string =
+    List.nth (String.split_on_char '<' (List.nth senate_xml_list pos)) 0
+
+  let make_member senate_xml_list =
+    Member.make
+      ( extract_field senate_xml_list 1,
+        extract_field senate_xml_list 3,
+        extract_field senate_xml_list 5,
+        extract_field senate_xml_list 7,
+        extract_field senate_xml_list 9,
+        extract_field senate_xml_list 11,
+        extract_field senate_xml_list 13,
+        extract_field senate_xml_list 15,
+        extract_field senate_xml_list 17,
+        extract_field senate_xml_list 19,
+        extract_field senate_xml_list 21 )
+
+  open Member
+
+  let rec parse_list_rec senate_xml_list acc =
+    match senate_xml_list with
+    | [] -> acc
+    | h :: t ->
+        if h = "<member" then parse_list_rec t (make_member t :: acc)
+        else parse_list_rec t acc
+
+  let parse_list senate_xml : t list =
+    parse_list_rec
+      (String.concat "" (senate_xml |> String.split_on_char '\n')
+      |> String.split_on_char '>')
+      []
+
+  let exec () = content_to_string "url" |> parse_list
+end
+
+module Committees :
+  Parser with type return = string list with type input = string = struct
   let url =
     "https://www.senate.gov/general/committee_assignments/assignments.htm"
 

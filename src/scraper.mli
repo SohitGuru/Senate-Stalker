@@ -17,4 +17,7 @@ module type Parser = sig
   val exec : input -> return
 end
 
-module Committees : Parser
+module Members : Parser with type return = Member.t list with type input = unit
+
+module Committees :
+  Parser with type return = string list with type input = string
