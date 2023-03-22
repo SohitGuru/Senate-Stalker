@@ -77,7 +77,7 @@ module Members :
       |> String.split_on_char '>')
       []
 
-  let exec () = content_to_string "url" |> parse_list
+  let exec () = content_to_string url |> parse_list
 end
 
 module Committees :
