@@ -9,6 +9,4 @@ Make sure to have the ocaml graphics and mechaml modules installed!
 
 ## How to start the Stalking:
 
-<span style="color:Blue">Type make run in your terminal to get started!
-
-
+<span style="color:blue">Type make run in your terminal to get started!</span>
