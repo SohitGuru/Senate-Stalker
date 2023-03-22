@@ -1,8 +1,7 @@
 (** Parsing of user commands *)
 
 type arg_phrase = string list
-(** the type [cmd] represents the command the user's command and the arguments
-    they provided *)
+(** the type [cmd] represents the user's command and the arguments they provided *)
 
 type field =
   | Name
