@@ -11,6 +11,9 @@ code:
 utop:
 	OCAMLRUNPARAM=b dune utop src
 
+run:
+	OCAMLRUNPARAM=b dune exec src/main.exe
+
 test:
 	OCAMLRUNPARAM=b dune exec test/main.exe
 
