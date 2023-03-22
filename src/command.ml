@@ -55,17 +55,19 @@ let rec fetch_args_rec str_list acc =
 
 let fetch_args str =
   let ns_str = str |> remove_leading_spaces in
+  let str_next_space = next_space_index ns_str in
   let str_commands =
-    String.sub ns_str (next_space_index ns_str) (String.length ns_str - 1)
+    String.sub ns_str str_next_space (String.length ns_str - str_next_space)
   in
   fetch_args_rec (String.split_on_char ' ' str_commands) []
 
 let rec parse str =
-  let str_next_space = next_space_index str in
   let str_spaceless = str |> remove_leading_spaces in
+  let str_next_space = next_space_index str_spaceless in
   let word = String.sub str_spaceless 0 str_next_space in
   let str_tail =
-    String.sub str_spaceless str_next_space (String.length str_spaceless - 1)
+    String.sub str_spaceless str_next_space
+      (String.length str_spaceless - str_next_space)
     |> remove_leading_spaces
   in
   if word = "List" && str_tail = "" then List
