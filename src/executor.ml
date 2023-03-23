@@ -5,8 +5,9 @@ open Command
 open Scraper
 
 let find_member (name : string list) =
+  String.concat " " name |> print_endline;
   match name with
-  | first :: last :: _ -> (
+  | last :: first :: _ -> (
       match
         Scraper.Members.exec ()
         |> List.find_opt (fun m ->
@@ -34,5 +35,5 @@ let execute (cmd : command) =
       | Email -> [ find_member y |> Member.email ]
       | Website -> [ find_member y |> Member.website ]
       | Class -> [ find_member y |> Member.class_num ]
-      | Committees -> Scraper.Committees.exec (String.concat "" y))
+      | Committees -> Scraper.Committees.exec (String.concat ", " y))
   | _ -> raise BadArgument
