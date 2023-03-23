@@ -13,15 +13,22 @@ let help_message =
   \    committees\n"
 
 let prompt = "> "
-let handle cmd = cmd |> Command.parse |> Executor.execute |> String.concat "\n"
+
+let handle cmd =
+  let open Command in
+  match cmd |> parse with
+  | (exception Empty) | (exception Invalid) -> "Invalid or empty argument"
+  | Quit -> raise Exit
+  | List -> Executor.execute List |> String.concat "\n"
+  | Fetch (f, o) -> Executor.execute (Fetch (f, o)) |> String.concat "\n"
 
 let rec prompter () =
   print_string prompt;
   match read_line () with
   | exception End_of_file -> ()
-  | "exit" -> ()
+  | exception Exit -> ()
   | st ->
-      print_string (handle st);
+      print_endline (handle st);
       prompter ()
 
 (** [main ()] prompts for the Senator name, then starts finding information
