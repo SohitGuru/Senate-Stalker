@@ -4,13 +4,19 @@ open Command
 let run_stalking s = raise (Failure "Error!")
 
 let help_message =
-  "To get a list of senators, please enter the command \'list\'\n\
-   To get information on a specific senator, please enter the field you want, \
-   followed by the senator's full name.\n\
-   Supported information fields are: \n\
-  \    state\n\
-  \    party\n\
-  \    committees\n"
+  "To get a list of senators, please enter the command \'List\'\n\
+   To get information on a specific senator, please enter \'Fetch [field] \
+   [full name of senator] \'\n\
+   Supported values of [field] are: \n\
+  \    Name\n\
+  \    Party\n\
+  \    State\n\
+  \    Address\n\
+  \    Phone\n\
+  \    Email\n\
+  \    Website\n\
+  \    Class\n\
+  \    Committees\n"
 
 let prompt = "> "
 
@@ -20,7 +26,11 @@ let handle cmd =
   | (exception Empty) | (exception Invalid) -> "Invalid or empty argument"
   | Quit -> raise Exit
   | List -> Executor.execute List |> String.concat "\n"
-  | Fetch (f, o) -> Executor.execute (Fetch (f, o)) |> String.concat "\n"
+  | Fetch (f, o) -> (
+      let open Executor in
+      try execute (Fetch (f, o)) |> String.concat "\n" with
+      | BadArgument -> "Invalid senator"
+      | UnexpectedError -> "An unexpected error occurred while webscraping.")
 
 let rec prompter () =
   print_string prompt;
@@ -30,7 +40,7 @@ let rec prompter () =
       match handle st with
       | exception Exit -> ()
       | out ->
-          print_endline out;
+          ANSITerminal.print_string [ ANSITerminal.green ] (out ^ "\n");
           prompter ())
 
 (** [main ()] prompts for the Senator name, then starts finding information
