@@ -26,10 +26,12 @@ let rec prompter () =
   print_string prompt;
   match read_line () with
   | exception End_of_file -> ()
-  | exception Exit -> ()
-  | st ->
-      print_endline (handle st);
-      prompter ()
+  | st -> (
+      match handle st with
+      | exception Exit -> ()
+      | out ->
+          print_endline out;
+          prompter ())
 
 (** [main ()] prompts for the Senator name, then starts finding information
     about said Senator. *)
