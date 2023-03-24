@@ -5,7 +5,8 @@ Run this program on OCaml version 4.14.0
 
 ***Install Guides***
 
-Make sure to have the ocaml graphics and mechaml modules installed!
+Make sure to have the ocaml graphics and mechaml modules installed! Also, 
+very important, run ***opam install tls*** before you start.
 
 ## How to start the Stalking:
 
