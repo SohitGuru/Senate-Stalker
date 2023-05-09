@@ -11,7 +11,10 @@ code:
 utop:
 	OCAMLRUNPARAM=b dune utop src
 
-run:
+gui:
+	OCAMLRUNPARAM=b dune exec front/gui.exe
+
+repl:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
 
 test:

@@ -1,0 +1,3 @@
+(executable
+ (name gui)
+ (libraries SenateStalker lablgtk2))
