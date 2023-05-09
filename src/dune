@@ -1,4 +1,4 @@
 (library
  (name senate)
  (public_name SenateStalker)
- (libraries mechaml lablgtk2))
+ (libraries mechaml))
