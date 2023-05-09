@@ -17,11 +17,16 @@ let scraper_tests =
 
 let parser_tests = []
 
-(* let x = content_to_file "" "" *)
-let gui_tests = []
+let markdown_tests =
+  let open Markdown in
+  [
+    ( "basic snippet replacement tests" >:: fun _ ->
+      assert_equal (replace_snippet "{name}" "name" "Gorg Abbott") "Gorg Abbott"
+    );
+  ]
 
 let tests =
   "test suite for project"
-  >::: List.flatten [ scraper_tests; parser_tests; gui_tests ]
+  >::: List.flatten [ scraper_tests; parser_tests; markdown_tests ]
 
 let _ = run_test_tt_main tests
