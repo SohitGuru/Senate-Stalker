@@ -12,7 +12,7 @@ utop:
 	OCAMLRUNPARAM=b dune utop src
 
 gui:
-	OCAMLRUNPARAM=b dune exec src/gui
+	OCAMLRUNPARAM=b dune exec src/gui.exe
 
 repl:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
