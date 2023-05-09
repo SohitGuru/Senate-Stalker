@@ -23,6 +23,14 @@ let markdown_tests =
     ( "basic snippet replacement tests" >:: fun _ ->
       assert_equal (replace_snippet "{name}" "name" "Gorg Abbott") "Gorg Abbott"
     );
+    ( "embedded snippet test" >:: fun _ ->
+      assert_equal
+        (replace_snippet "Lorem {word} dolor sit amet" "word" "ipsum")
+        "Lorem ipsum dolor sit amet" );
+    ( "multiple identical tokens" >:: fun _ ->
+      assert_equal
+        (replace_snippet "{snippet} {snippet}" "snippet" "snip")
+        "snip snip" );
   ]
 
 let tests =
