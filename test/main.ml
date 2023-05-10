@@ -17,7 +17,48 @@ let scraper_tests =
          encoding=\"UTF-8\"?><contact_information><member>" );
   ]
 
-let parser_tests = []
+let make_parse_test (name : string) (command : string) (result : command) =
+  name >:: fun _ -> assert_equal (parse command) result
+
+let parse_tests =
+  [
+    make_parse_test "parse quit" "Quit" Quit;
+    make_parse_test "parse list" "List" List;
+    make_parse_test "parse fetch name" "Fetch Name test"
+      (Fetch (Name, [ "test" ]));
+    make_parse_test "parse fetch party" "Fetch Party test"
+      (Fetch (Party, [ "test" ]));
+    make_parse_test "parse fetch state" "Fetch State test"
+      (Fetch (State, [ "test" ]));
+    make_parse_test "parse fetch address" "Fetch Address test"
+      (Fetch (Address, [ "test" ]));
+    make_parse_test "parse fetch phone" "Fetch Phone test"
+      (Fetch (Phone, [ "test" ]));
+    make_parse_test "parse fetch email" "Fetch Email test"
+      (Fetch (Email, [ "test" ]));
+    make_parse_test "parse fetch website" "Fetch Website test"
+      (Fetch (Website, [ "test" ]));
+    make_parse_test "parse fetch class" "Fetch Class test"
+      (Fetch (Class, [ "test" ]));
+    make_parse_test "parse fetch committees" "Fetch Committees test"
+      (Fetch (Committees, [ "test" ]));
+    make_parse_test "two item arg phrase" "Fetch Name a b"
+      (Fetch (Name, [ "b"; "a" ]));
+    make_parse_test "two item arg phrase with extra white space"
+      "Fetch Name a    b"
+      (Fetch (Name, [ "b"; "a" ]));
+    make_parse_test "three item arg phrase" "Fetch Name a b c"
+      (Fetch (Name, [ "c"; "b"; "a" ]));
+    make_parse_test "parse empty arg phrase" "Fetch Name" (Fetch (Name, []));
+    ( "parse empty string (should raise Empty)" >:: fun _ ->
+      assert_raises Empty (fun () -> parse "") );
+    ( "parse empty string with whitespace" >:: fun _ ->
+      assert_raises Empty (fun () -> parse "    ") );
+    ( "parse bad command: quit with arguments" >:: fun _ ->
+      assert_raises Invalid (fun () -> parse "quit bad args") );
+    ( "parse bad command: list with arguments" >:: fun _ ->
+      assert_raises Invalid (fun () -> parse "list bad args") );
+  ]
 
 let markdown_tests =
   let open Markdown in
@@ -44,22 +85,22 @@ let fetch_tests =
       (Fetch (Name, [ "Sanders"; "Bernard" ]))
       [ "Bernard Sanders" ];
     make_fetch_test "fetch party test"
-      (Fetch (Party, [ "Booker"; "Cory A." ]))
-      [ "D" ];
+      (Fetch (Party, [ "Sanders"; "Bernard" ]))
+      [ "I" ];
     make_fetch_test "fetch state test"
       (Fetch (State, [ "Sanders"; "Bernard" ]))
       [ "VT" ];
     make_fetch_test "fetch address test"
-      (Fetch (Address, [ "Schumer"; "Charles E." ]))
-      [ "322 Hart Senate Office Building Washington DC 20510" ];
+      (Fetch (Address, [ "Sanders"; "Bernard" ]))
+      [ "332 Dirksen Senate Office Building Washington DC 20510" ];
     make_fetch_test "fetch phone test"
-      (Fetch (Phone, [ "Baldwin"; "Tammy" ]))
-      [ "(202) 224-5653" ];
+      (Fetch (Phone, [ "Sanders"; "Bernard" ]))
+      [ "(202) 224-5141" ];
     make_fetch_test "fetch address test"
-      (Fetch (Email, [ "Padilla"; "Alex" ]))
-      [ "https://www.padilla.senate.gov/contact/" ];
+      (Fetch (Email, [ "Sanders"; "Bernard" ]))
+      [ "https://www.sanders.senate.gov/contact/" ];
     make_fetch_test "fetch class test"
-      (Fetch (Class, [ "Warren"; "Elizabeth" ]))
+      (Fetch (Class, [ "Sanders"; "Bernard" ]))
       [ "Class I" ];
     make_fetch_test "fetch committees test"
       (Fetch (Committees, [ "Sanders"; "Bernard" ]))
@@ -74,6 +115,6 @@ let fetch_tests =
 
 let tests =
   "test suite for project"
-  >::: List.flatten [ scraper_tests; parser_tests; markdown_tests; fetch_tests ]
+  >::: List.flatten [ scraper_tests; parse_tests; markdown_tests; fetch_tests ]
 
 let _ = run_test_tt_main tests
