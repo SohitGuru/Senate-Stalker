@@ -18,7 +18,9 @@ let handle cmd =
   let open Command in
   match cmd |> parse with
   | (exception Empty) | (exception Invalid) -> "Invalid or empty argument"
-  | Quit -> raise Exit
+  | Quit ->
+      GMain.Main.quit ();
+      ""
   | List -> Executor.execute List |> String.concat "\n"
   | Fetch (f, o) -> (
       let open Executor in
