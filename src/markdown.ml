@@ -17,17 +17,18 @@ let write_str f s =
 let write_list f lst = String.concat "\n" lst |> write_str f
 
 let handle_part st open_delim d : string =
-  match String.split_on_char open_delim st with
-  | [ preface; token ] -> (
-      try preface ^ Dictionary.find token d
-      with Dictionary.NotFound -> preface ^ st)
-  | _ -> failwith "Bad input"
+  if String.contains st open_delim then
+    match String.split_on_char open_delim st with
+    | [ preface; token ] -> (
+        try preface ^ Dictionary.find token d
+        with Dictionary.NotFound -> preface ^ st)
+    | _ -> failwith "Bad input: " ^ st
+  else st
 
 let replace_snippet ?(open_delim = '{') ?(close_delim = '}') (o : string)
     (d : (string, string) Dictionary.t) : string =
-  let lst = String.split_on_char close_delim o in
-  let revlist = List.rev lst in
-  let replaced =
-    List.map (fun x -> handle_part x open_delim d) (revlist |> List.tl)
-  in
-  String.concat "" (List.hd revlist :: replaced |> List.rev)
+  match String.split_on_char close_delim o with
+  | [] | [ _ ] -> o
+  | h :: _ as lst ->
+      let replaced = List.map (fun x -> handle_part x open_delim d) lst in
+      String.concat "" replaced

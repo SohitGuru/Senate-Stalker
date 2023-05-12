@@ -17,6 +17,30 @@ let find_member (name : string list) =
       | Some m -> m
       | None -> raise BadArgument)
 
+let export (path : string) (sen : arg_phrase) =
+  let open Member in
+  let m = find_member sen in
+  let d =
+    Dictionary.(
+      empty
+      |> insert "name" (first_name m ^ " " ^ last_name m)
+      |> insert "party" (party m)
+      |> insert "state" (state m)
+      |> insert "address" (address m)
+      |> insert "email" (email m)
+      |> insert "phone" (phone m)
+      |> insert "website" (website m)
+      |> insert "class" (class_num m)
+      |> insert "committees"
+           (try
+              Scraper.Committees.exec (last_name m ^ ", " ^ first_name m)
+              |> String.concat ", "
+            with UnknownSenator -> raise UnexpectedError))
+  in
+  let originals = Markdown.list_of_file "data/template.md" in
+  List.map (fun st -> Markdown.replace_snippet st d) originals
+  |> List.rev |> Markdown.write_list path
+
 let execute (cmd : command) =
   match cmd with
   | List ->
@@ -39,4 +63,7 @@ let execute (cmd : command) =
       | Committees -> (
           try Scraper.Committees.exec (String.concat ", " y)
           with UnknownSenator -> raise UnexpectedError))
+  | Export (path, sen) ->
+      export path sen;
+      [ "Data exported to " ^ path ]
   | _ -> raise BadArgument

@@ -1,4 +1,4 @@
-# Senator {full name} Senate Stalker Profile
+# Senator {name} Senate Stalker Profile
 ---
 Here is the information we have collected on the senator:
 
