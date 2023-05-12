@@ -27,3 +27,6 @@ zip:
 clean:
 	dune clean
 	rm -f keaton.zip
+
+doc:
+	dune build @doc
