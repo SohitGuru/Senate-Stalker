@@ -104,16 +104,21 @@ let handle cmd =
   | Quit ->
       GMain.Main.quit ();
       ""
-  | List -> Executor.execute List |> String.concat "\t"
+  | List -> Executor.execute List |> String.concat ", "
   | Fetch (f, o) -> (
       let open Executor in
-      try execute (Fetch (f, o)) |> String.concat "\n" with
+      try
+        execute (Fetch (f, o))
+        |> String.concat (if f = Committees then ", " else "\n")
+      with
       | BadArgument -> "Invalid Senator"
       | UnexpectedError ->
           create_popup_dialog ();
           "")
   (* Need to handle Export case *)
-  | _ -> ""
+  | Export (p, s) -> (
+      try String.concat "\n" (Executor.execute (Export (p, s)))
+      with _ -> "An error occured")
 
 (* Initial window with Welcome label and How-to label. Also with button to
    execute webscraping and a text entry field. Results are shown on a label
