@@ -4,8 +4,11 @@ val create_window : unit -> GEdit.entry * GButton.button * GMisc.label
 (** Create the main window with a label, text field entry, and button. Returns a
     tuple containing the entry widget and the button widget. *)
 
+val create_popup_dialog : unit -> unit
+(** Create an error popup if webscrapping encounters an error. *)
+
 val create_button : GPack.fixed -> GButton.button
-(** Creates a button and handle its click event *)
+(** Creates a button and handle its click event. *)
 
 val main : unit -> unit
-(** Entry point of the GUI application. Executes GUI *)
+(** Entry point of the GUI application. Executes GUI. *)
