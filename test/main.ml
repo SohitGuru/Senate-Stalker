@@ -61,19 +61,22 @@ let parse_tests =
   ]
 
 let markdown_tests =
+  let d =
+    Dictionary.(
+      empty
+      |> insert "name" "Gorg Abbott"
+      |> insert "word" "ipsum" |> insert "snippet" "snip")
+  in
   let open Markdown in
   [
     ( "basic snippet replacement tests" >:: fun _ ->
-      assert_equal (replace_snippet "{name}" "name" "Gorg Abbott") "Gorg Abbott"
-    );
+      assert_equal (replace_snippet "{name}" d) "Gorg Abbott" );
     ( "embedded snippet test" >:: fun _ ->
       assert_equal
-        (replace_snippet "Lorem {word} dolor sit amet" "word" "ipsum")
+        (replace_snippet "Lorem {word} dolor sit amet" d)
         "Lorem ipsum dolor sit amet" );
     ( "multiple identical tokens" >:: fun _ ->
-      assert_equal
-        (replace_snippet "{snippet} {snippet}" "snippet" "snip")
-        "snip snip" );
+      assert_equal (replace_snippet "{snippet} {snippet}" d) "snip snip" );
   ]
 
 let make_fetch_test (name : string) (command : command) (result : string list) =

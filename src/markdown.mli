@@ -18,8 +18,14 @@ val write_list : string -> string list -> unit
     at [path]. *)
 
 val replace_snippet :
-  ?open_delim:char -> ?close_delim:char -> string -> string -> string -> string
-(** [replace_snippet ?open_delim:o ?close_delim:c original token replacement]
-    replaces every occurence of [o ^ token ^ c] in [original] with
-    [replacement]. By default, the open delimiter is ['{'] and the close
+  ?open_delim:char ->
+  ?close_delim:char ->
+  string ->
+  (string, string) Dictionary.t ->
+  string
+(** [replace_snippet ?open_delim:o ?close_delim:c original dictionary] replaces
+    a series of delimited tokens with given values. [dictionary] should map each
+    token to the value that should replace it. For each binding of a [token] to
+    a [replacement] in the map, every occurance of [o ^ token ^ c] in [original]
+    with [replacement]. By default, the open delimiter is ['{'] and the close
     delimiter is ['}']. *)
