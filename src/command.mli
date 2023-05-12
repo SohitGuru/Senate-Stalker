@@ -20,6 +20,7 @@ type command =
   | Fetch of field * arg_phrase
   | List
   | Quit
+  | Export of string * arg_phrase
 
 exception Empty
 exception Invalid

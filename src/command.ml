@@ -15,6 +15,7 @@ type command =
   | Fetch of field * arg_phrase
   | List
   | Quit
+  | Export of string * arg_phrase
 
 exception Empty
 exception Invalid
@@ -47,6 +48,10 @@ let fetch_field str =
   | "Committees" -> Committees
   | _ -> raise Invalid
 
+let fetch_path str =
+  let ns_str = str |> remove_leading_spaces in
+  String.sub ns_str 0 (next_space_index ns_str)
+
 let rec fetch_args_rec str_list acc =
   match str_list with
   | [] -> acc
@@ -75,4 +80,6 @@ let rec parse str =
     if word = "List" && str_tail = "" then List
     else if word = "Quit" && str_tail = "" then Quit
     else if word = "Fetch" then Fetch (fetch_field str_tail, fetch_args str_tail)
+    else if word = "Export" then
+      Export (fetch_path str_tail, fetch_args str_tail)
     else raise Invalid

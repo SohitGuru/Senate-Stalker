@@ -58,6 +58,12 @@ let parse_tests =
       assert_raises Invalid (fun () -> parse "quit bad args") );
     ( "parse bad command: list with arguments" >:: fun _ ->
       assert_raises Invalid (fun () -> parse "list bad args") );
+    make_parse_test "parse command export: typical case"
+      "Export data/test Bernard Sanders"
+      (Export ("data/test", [ "Sanders"; "Bernard" ]));
+    make_parse_test "parse command export with empty arg phrase"
+      "Export data/test"
+      (Export ("data/test", []));
   ]
 
 let markdown_tests =
