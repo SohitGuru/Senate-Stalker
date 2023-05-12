@@ -1,19 +1,82 @@
 open Gtk
+open GMain
+open GdkKeysyms
 open Senate
 open Command
 open Pango
 
 (* Constants to avoid use of magic numbers*)
-let width_of_window = 1000
+let width_of_window = 800
 let height_of_window = 675
 let x_coordinate_of_button = 10
 let y_coordinate_of_button = 10
 let max_length_of_text = 10
-let width_of_button = 20
+let width_of_button = 15
 let height_of_button = 30
-let width_of_entry = 80
+let width_of_entry = 150
 let height_of_entry = 40
+let width_of_resultlabel = 200
+let height_of_resultlabel = 150
+let spacing_between_boxes = 30
+let width_of_historylabel = 60
+let height_of_historylabel = 40
+(* 
 
+   let title_label = GMisc.label ~markup:"<b>History: </b>" ~packing:hbox#add ()
+   in title_label#misc#modify_font_by_name "Palatino 16";
+   title_label#misc#set_size_request ~width:width_of_historylabel
+   ~height:height_of_historylabel (); title_label#set_justify `CENTER;
+   title_label#misc#modify_bg [ (`NORMAL, `COLOR (GDraw.color (`NAME "brown")))
+   ];
+
+   let history_label = GMisc.label ~packing:hbox#add () in
+
+   history_label#misc#modify_font_by_name "Palatino 16";
+   history_label#set_justify `RIGHT; history_label#misc#set_size_request
+   ~width:width_of_historylabel ~height:height_of_historylabel ();
+   history_label#misc#modify_bg [ (`NORMAL, `COLOR (GDraw.color (`NAME "gray")))
+   ];
+
+   let history_list = ref [] in
+
+   let button_callback : unit -> unit = fun () -> let text1 = entry#text in
+   result_label#set_text (handle text1);
+
+   (* Get the current text from the result label *) let text2 =
+   result_label#text in
+
+   if text2 <> "Invalid argument" && text2 <> "Invalid Senator" then (* Add the
+   text to the history list *) history_list := text2 :: !history_list;
+
+   (* Limit the history list to the last 5 entries *) history_list := take
+   !history_list;
+
+   (* Update the history label *) history_label#set_text (String.concat "\n"
+   (List.rev !history_list));
+
+   (* Clear the entry widget *) entry#set_text ""; () in *)
+
+(* Creates an about popup that explains *)
+let create_aboutpopup_dialog () =
+  let dialog =
+    GWindow.message_dialog
+      ~message:
+        "Senate Stalker is a program created by the CS3110 project team: \
+         Keaton-Camels. The team consists of Anya Khanna (netid: ak2243), \
+         Dayana Soria Lopez (netid: dns64), Jordan Rudolph (netid: jmr489), \
+         and Sohit Gurung (netid: sg857). Senate Stalker provides information \
+         on a Senator specified by the client such as Party, State, Address, \
+         Phone Number, Email, Website, and Committees the Senator is part of. \
+         Users also have the option to download this information as well, in \
+         order to better understand our current Senators."
+      ~buttons:GWindow.Buttons.close ~message_type:`INFO ()
+  in
+  dialog#set_position `CENTER_ALWAYS;
+
+  ignore (dialog#run ());
+  dialog#destroy ()
+
+(* Creates error message if web scraping encounters error. *)
 let create_popup_dialog () =
   let dialog =
     GWindow.message_dialog
@@ -31,16 +94,8 @@ let take lst =
   | a :: b :: c :: d :: e :: _ -> [ a; b; c; d; e ]
   | _ -> lst (* Return the original list if it has less than 5 elements *)
 
-(* Button with constraints on size *)
-let create_button fixed_container =
-  let button = GButton.button ~label:"Test press" () in
-  ignore (button#connect#clicked ~callback:(fun () -> print_endline "Sample"));
-  fixed_container#put button#coerce ~x:x_coordinate_of_button
-    ~y:y_coordinate_of_button;
-  button
-
 (* Similar function from bin/main.ml that handles the input from the text entry
-   but with major changes to handling certain cases*)
+   but with major changes to handling certain cases. *)
 let handle cmd =
   let open Command in
   match cmd |> parse with
@@ -74,7 +129,28 @@ let create_window () =
   window#set_resizable true;
   window#set_modal true;
 
-  let vbox = GPack.vbox ~packing:window#add () in
+  let vbox = GPack.vbox ~spacing:spacing_between_boxes ~packing:window#add () in
+
+  (* Menu bar *)
+  let menubar = GMenu.menu_bar ~packing:vbox#add () in
+
+  let menu =
+    GMenu.menu
+      ~packing:
+        (GMenu.menu_item ~label:"Menu" ~packing:menubar#append ())#set_submenu
+      ()
+  in
+  GToolbox.build_menu menu
+    ~entries:
+      [
+        `I ("Export", fun () -> print_endline "export");
+        `I ("History", fun () -> print_endline "history");
+        `I ("About", fun () -> create_aboutpopup_dialog ());
+        `S;
+        `I ("Quit", GMain.Main.quit);
+      ];
+
+  menu#set_border_width 1;
 
   let firstlabel =
     GMisc.label ~text:"Senate Stalker: Learn more about our Senators!"
@@ -110,7 +186,7 @@ let create_window () =
 
   secondlabel#misc#modify_font_by_name "Serif 20";
 
-  let hbox = GPack.hbox ~spacing:6 ~packing:vbox#add () in
+  let hbox = GPack.hbox ~spacing:spacing_between_boxes ~packing:vbox#add () in
 
   let entry =
     GEdit.entry ~width:width_of_entry ~height:height_of_entry ~packing:hbox#add
@@ -144,6 +220,29 @@ let create_window () =
   let orange_color = GDraw.color (`NAME "orange") in
   button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
 
+  let result_label = GMisc.label ~text:"" ~packing:vbox#add () in
+
+  result_label#misc#modify_font_by_name "Serif 20";
+  result_label#set_line_wrap true;
+  result_label#set_selectable true;
+
+  result_label#set_justify `LEFT;
+  result_label#misc#set_size_request ~width:width_of_resultlabel
+    ~height:height_of_resultlabel ();
+
+  let button_callback : unit -> unit =
+   fun () ->
+    let text1 = entry#text in
+    result_label#set_text (handle text1);
+
+    (* Clear the entry widget *)
+    entry#set_text "";
+    ()
+  in
+
+  (* Connect the button click event to the callback function *)
+  ignore (button#connect#clicked ~callback:button_callback);
+
   let red_color = GDraw.color (`NAME "red") in
   ignore
     (button#event#connect#enter_notify ~callback:(fun _ ->
@@ -155,47 +254,6 @@ let create_window () =
     (button#event#connect#leave_notify ~callback:(fun _ ->
          button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
          true));
-
-  let result_label = GMisc.label ~text:"" ~packing:vbox#add () in
-  ignore
-    (button#connect#clicked ~callback:(fun () ->
-         let text = entry#text in
-         result_label#set_text (handle text)));
-
-  result_label#misc#modify_font_by_name "Serif 20";
-  result_label#set_line_wrap true;
-  result_label#set_selectable true;
-
-  result_label#set_max_width_chars 1000;
-
-  result_label#set_justify `LEFT;
-  result_label#misc#set_size_request ~width:200 ~height:100 ();
-
-  let history_label = GMisc.label ~packing:hbox#add () in
-
-  history_label#misc#modify_font_by_name "Palatino 16";
-  history_label#misc#modify_bg
-    [ (`NORMAL, `COLOR (GDraw.color (`NAME "gray"))) ];
-
-  let history_list = ref [] in
-
-  ignore
-    (button#connect#clicked ~callback:(fun () ->
-         (* Get the current text from the entry widget *)
-         let text = result_label#text in
-
-         if text != "Invalid argument" || text != "Invalid Senator" then
-           (* Add the text to the history list *)
-           history_list := text :: !history_list;
-
-         (* Limit the history list to the last 5 entries *)
-         history_list := take !history_list;
-
-         (* Update the history label *)
-         history_label#set_text (String.concat "\n" (List.rev !history_list));
-
-         (* Clear the entry widget *)
-         entry#set_text ""));
 
   window#show ();
   (entry, button, result_label)

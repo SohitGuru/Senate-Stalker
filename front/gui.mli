@@ -7,8 +7,5 @@ val create_window : unit -> GEdit.entry * GButton.button * GMisc.label
 val create_popup_dialog : unit -> unit
 (** Create an error popup if webscrapping encounters an error. *)
 
-val create_button : GPack.fixed -> GButton.button
-(** Creates a button and handle its click event. *)
-
 val main : unit -> unit
 (** Entry point of the GUI application. Executes GUI. *)
