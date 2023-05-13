@@ -16,7 +16,8 @@ let help_message =
   \    Email\n\
   \    Website\n\
   \    Class\n\
-  \    Committees\n"
+  \    Committees\n\
+  \    Export\n"
 
 let prompt = "> "
 
@@ -31,6 +32,9 @@ let handle cmd =
       try execute (Fetch (f, o)) |> String.concat "\n" with
       | BadArgument -> "Invalid senator"
       | UnexpectedError -> "An unexpected error occurred while webscraping.")
+  | Export (p, s) -> (
+      try String.concat "\n" (Executor.execute (Export (p, s)))
+      with _ -> "An error occured")
 
 let rec prompter () =
   print_string prompt;
