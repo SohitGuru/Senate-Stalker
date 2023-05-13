@@ -23,9 +23,14 @@ let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 30
 let previous_texts = ref []
 let current_index = ref (-1)
+let width_of_historydialog = 300
+let height_of_historydialog = 250
+let spacing_between_boxes = 30
+let previous_texts = ref []
+let current_index = ref (-1)
 
-(* Form of history; if you press the up key, you get your previous text entry
-   you wrote. *)
+(* Form of history; if you press the up key, you get your previous text entries
+   you wrote. Press down to view more recent previous entries. *)
 let on_key_press entry event : bool =
   let key = GdkEvent.Key.keyval event in
   match key with
@@ -35,7 +40,7 @@ let on_key_press entry event : bool =
         current_index := (!current_index - 1 + num_entries) mod num_entries;
         entry#set_text (List.nth !previous_texts !current_index));
       true
-  | 65364 ->
+  | 65364 (* GdkKeysyms._Down *) ->
       let num_entries = List.length !previous_texts in
       if num_entries > 0 then
         if !current_index = num_entries - 1 then entry#set_text ""
@@ -45,20 +50,27 @@ let on_key_press entry event : bool =
       true
   | _ -> false
 
-(* Creates an about popup that explains *)
+(* Creates an about popup introducing our team and oriject *)
 let create_aboutpopup_dialog () =
   let dialog =
-    GWindow.message_dialog
-      ~message:
+    GWindow.about_dialog ~name:"Senate Stalker" ~title:"About Us"
+      ~authors:
+        [
+          "Anya Khanna (netid: ak2243)";
+          "Dayana Soria Lopez (netid: dns64)";
+          "Jordan Rudolph (netid: jmr489)";
+          "Sohit Gurung (netid: sg857)";
+        ]
+      ~comments:
         "Senate Stalker is a program created by the CS3110 project team: \
-         Keaton-Camels. The team consists of Anya Khanna (netid: ak2243), \
-         Dayana Soria Lopez (netid: dns64), Jordan Rudolph (netid: jmr489), \
-         and Sohit Gurung (netid: sg857). Senate Stalker provides information \
-         on a senator specified by the client such as Party, State, Address, \
-         Phone Number, Email, Website, and Committees the senator is part of. \
-         Users also have the option to download this information as well, in \
-         order to better understand our current senators."
-      ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
+         Keaton-Camels. Senate Stalker provides information on a senator \
+         specified by the client such as Party, State, Address, Phone Number, \
+         Email, Website, and Committees the senator is part of. Users also \
+         have the option to download this information as well, in order to \
+         better understand our current senators."
+      ~decorated:true
+      ~logo:(GdkPixbuf.from_file "data/senatestalkerlogo.ico")
+      ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
@@ -94,16 +106,43 @@ let create_helppopup_dialog () =
   ignore (dialog#run ());
   dialog#destroy ()
 
-(* Takes at most 5 elements from a list *)
-let take lst =
+(* Takes at most, the last 5 elements from a list *)
+let take_last_five lst =
+  let rec aux acc remaining =
+    match remaining with
+    | [] -> List.rev acc
+    | _ :: tail ->
+        if List.length acc < 5 then aux (List.hd remaining :: acc) tail
+        else aux (List.tl acc @ [ List.hd remaining ]) tail
+  in
+  aux [] lst
+
+(* Function that converts a list into a bulleted list. *)
+let to_bulleted_string lst =
   match lst with
-  | a :: b :: c :: d :: e :: _ -> [ a; b; c; d; e ]
-  | _ -> lst (* Return the original list if it has less than 5 elements *)
+  | [] -> "Your history is empty 💤"
+  | _ ->
+      let bullet_point = "• " in
+      let lines = List.map (fun x -> bullet_point ^ x) lst in
+      String.concat "\n" lines
+
+let create_history_dialog () =
+  let dialog =
+    GWindow.dialog ~title:"History" ~width:width_of_historydialog
+      ~height:height_of_historydialog ~position:`CENTER_ALWAYS ()
+  in
+  let label =
+    GMisc.label ~text:(take_last_five !previous_texts |> to_bulleted_string) ()
+  in
+  let _ = dialog#vbox#add label#coerce in
+  let _ = dialog#add_button_stock `CLOSE `CLOSE in
+  dialog#show ();
+  ignore (dialog#run ());
+  dialog#destroy ()
 
 (* Similar function from bin/main.ml that handles the input from the text entry
    but with major changes to handling certain cases. *)
 let handle cmd =
-  if String.contains ""
   let open Command in
   match cmd |> parse with
   | exception Empty -> "Please write in an argument!"
@@ -145,9 +184,10 @@ let create_export_popup () =
   let selected w () =
     match w#filename with
     | Some s ->
-        (* Executor.execute (Export (s ^ "/senstalk.md", [ "Sanders"; "Bernard" ])) *)
-        print_endline s; (* TODO change this*)
-        |> ignore
+        (* Executor.execute (Export (s ^ "/senstalk.md", [ "Sanders"; "Bernard"
+           ])) *)
+        print_endline s
+    (* TODO change this*)
     | None -> ()
   in
   let widget = GWindow.file_chooser_dialog `SELECT_FOLDER () in
@@ -195,7 +235,7 @@ let create_window () =
     ~entries:
       [
         `I ("About", fun () -> create_aboutpopup_dialog ());
-        `I ("History", fun () -> print_endline "history");
+        `I ("History", fun () -> create_history_dialog ());
         `I ("Help", fun () -> create_helppopup_dialog ());
         `I ("Export", fun () -> create_export_popup ());
         `S;
@@ -283,7 +323,7 @@ let create_window () =
   let button_callback : unit -> unit =
    fun () ->
     let text1 = entry#text in
-    previous_texts := List.append !previous_texts [ text1 ];
+    if text1 <> "" then previous_texts := List.append !previous_texts [ text1 ];
     result_label#set_text
       (if text1 = "List" || check_string text1 then (
        result_label#misc#modify_font_by_name "Serif 16.5";
