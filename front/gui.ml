@@ -69,7 +69,7 @@ let create_aboutpopup_dialog () =
          Phone Number, Email, Website, and Committees the Senator is part of. \
          Users also have the option to download this information as well, in \
          order to better understand our current Senators."
-      ~buttons:GWindow.Buttons.close ~message_type:`INFO ()
+      ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
@@ -82,6 +82,23 @@ let create_popup_dialog () =
     GWindow.message_dialog
       ~message:"An unexpected error occurred while web scraping."
       ~buttons:GWindow.Buttons.close ~message_type:`ERROR ()
+  in
+  dialog#set_position `CENTER_ALWAYS;
+
+  ignore (dialog#run ());
+  dialog#destroy ()
+
+(* Creates a help pop-up *)
+let create_helppopup_dialog () =
+  let dialog =
+    GWindow.message_dialog
+      ~message:
+        "To get started, simply write either List to get a list of all the \
+         names of the Senators or Fetch followed by a name of a Senator and a \
+         field specifying what it is you want to know about the Senator. After \
+         if you want to save the information you found in a .md file, simply \
+         write Export followed by the pathname and name of Senator. "
+      ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
@@ -120,6 +137,11 @@ let handle cmd =
       try String.concat "\n" (Executor.execute (Export (p, s)))
       with _ -> "An error occured")
 
+(* Change color of button after mouse stops hovering over it *)
+let change_color butt () =
+  let red_color = GDraw.color (`NAME "red") in
+  butt#misc#modify_bg [ (`NORMAL, `COLOR red_color) ]
+
 (* Initial window with Welcome label and How-to label. Also with button to
    execute webscraping and a text entry field. Results are shown on a label
    below the text entry field. *)
@@ -148,9 +170,9 @@ let create_window () =
   GToolbox.build_menu menu
     ~entries:
       [
-        `I ("Export", fun () -> print_endline "export");
-        `I ("History", fun () -> print_endline "history");
         `I ("About", fun () -> create_aboutpopup_dialog ());
+        `I ("History", fun () -> print_endline "history");
+        `I ("Help", fun () -> create_helppopup_dialog ());
         `S;
         `I ("Quit", GMain.Main.quit);
       ];
@@ -182,7 +204,8 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
-        \    Committees\n"
+        \    Committees\n\
+        \    Export\n"
       ~packing:vbox#add ()
   in
 
@@ -217,6 +240,13 @@ let create_window () =
   (* Function to allow enter key activate button press *)
   ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
 
+  ignore (button#connect#enter ~callback:(fun () -> change_color button ()));
+
+  let orange_color = GDraw.color (`NAME "orange") in
+  ignore
+    (button#connect#leave ~callback:(fun () ->
+         button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ]));
+
   let font_desc = Pango.Font.from_string "Georgia 24" in
   let label = GMisc.label ~markup:"Stalk a <i>Senator</i>!" () in
   label#misc#modify_font font_desc;
@@ -247,18 +277,6 @@ let create_window () =
 
   (* Connect the button click event to the callback function *)
   ignore (button#connect#clicked ~callback:button_callback);
-
-  let red_color = GDraw.color (`NAME "red") in
-  ignore
-    (button#event#connect#enter_notify ~callback:(fun _ ->
-         button#misc#modify_bg [ (`NORMAL, `COLOR red_color) ];
-         true));
-
-  let orange_color = GDraw.color (`NAME "orange") in
-  ignore
-    (button#event#connect#leave_notify ~callback:(fun _ ->
-         button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
-         true));
 
   window#show ();
   (entry, button, result_label)
