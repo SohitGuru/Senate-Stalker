@@ -6,8 +6,8 @@ open Command
 open Pango
 
 (* Constants to avoid use of magic numbers*)
-let width_of_window = 800
-let height_of_window = 675
+let width_of_window = 1000
+let height_of_window = 750
 let x_coordinate_of_button = 10
 let y_coordinate_of_button = 10
 let max_length_of_text = 10
@@ -15,8 +15,10 @@ let width_of_button = 15
 let height_of_button = 30
 let width_of_entry = 150
 let height_of_entry = 40
-let width_of_resultlabel = 200
-let height_of_resultlabel = 150
+let scuffedwidth_of_resultlabel = 975
+let scuffedheight_of_resultlabel = 225
+let normalwidth_of_resultlabel = 400
+let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 30
 let width_of_historylabel = 60
 let height_of_historylabel = 40
@@ -137,6 +139,14 @@ let handle cmd =
       try String.concat "\n" (Executor.execute (Export (p, s)))
       with _ -> "An error occured")
 
+(* Checks if the command is Fetch Committees or not. *)
+let check_string str =
+  let prefix = "Fetch Committees" in
+  let len_prefix = String.length prefix in
+  if String.length str >= len_prefix && String.sub str 0 len_prefix = prefix
+  then true
+  else false
+
 (* Change color of button after mouse stops hovering over it *)
 let change_color butt () =
   let red_color = GDraw.color (`NAME "red") in
@@ -240,6 +250,9 @@ let create_window () =
   (* Function to allow enter key activate button press *)
   ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
 
+  let orange_color = GDraw.color (`NAME "orange") in
+  button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
+
   ignore (button#connect#enter ~callback:(fun () -> change_color button ()));
 
   let orange_color = GDraw.color (`NAME "orange") in
@@ -252,23 +265,31 @@ let create_window () =
   label#misc#modify_font font_desc;
   button#add label#coerce;
 
-  let orange_color = GDraw.color (`NAME "orange") in
-  button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
+  let result_label =
+    GMisc.label ~text:"" ~height:normalheight_of_resultlabel
+      ~width:normalwidth_of_resultlabel ~packing:vbox#add ()
+  in
 
-  let result_label = GMisc.label ~text:"" ~packing:vbox#add () in
-
-  result_label#misc#modify_font_by_name "Serif 20";
+  result_label#misc#modify_font_by_name "Serif 24";
   result_label#set_line_wrap true;
   result_label#set_selectable true;
 
-  result_label#set_justify `LEFT;
-  result_label#misc#set_size_request ~width:width_of_resultlabel
-    ~height:height_of_resultlabel ();
+  result_label#set_justify `CENTER;
 
   let button_callback : unit -> unit =
    fun () ->
     let text1 = entry#text in
-    result_label#set_text (handle text1);
+    result_label#set_text
+      (if text1 = "List" || check_string text1 then (
+       result_label#misc#modify_font_by_name "Serif 16.5";
+       result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
+         ~height:scuffedheight_of_resultlabel ();
+       handle text1)
+      else (
+        result_label#misc#modify_font_by_name "Serif 24";
+        result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
+          ~height:normalheight_of_resultlabel ();
+        handle text1));
 
     (* Clear the entry widget *)
     entry#set_text "";
