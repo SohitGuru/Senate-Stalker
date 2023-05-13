@@ -21,41 +21,29 @@ let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 30
-(* 
+let previous_texts = ref []
+let current_index = ref (-1)
 
-   let title_label = GMisc.label ~markup:"<b>History: </b>" ~packing:hbox#add ()
-   in title_label#misc#modify_font_by_name "Palatino 16";
-   title_label#misc#set_size_request ~width:width_of_historylabel
-   ~height:height_of_historylabel (); title_label#set_justify `CENTER;
-   title_label#misc#modify_bg [ (`NORMAL, `COLOR (GDraw.color (`NAME "brown")))
-   ];
-
-   let history_label = GMisc.label ~packing:hbox#add () in
-
-   history_label#misc#modify_font_by_name "Palatino 16";
-   history_label#set_justify `RIGHT; history_label#misc#set_size_request
-   ~width:width_of_historylabel ~height:height_of_historylabel ();
-   history_label#misc#modify_bg [ (`NORMAL, `COLOR (GDraw.color (`NAME "gray")))
-   ];
-
-   let history_list = ref [] in
-
-   let button_callback : unit -> unit = fun () -> let text1 = entry#text in
-   result_label#set_text (handle text1);
-
-   (* Get the current text from the result label *) let text2 =
-   result_label#text in
-
-   if text2 <> "Invalid argument" && text2 <> "Invalid Senator" then (* Add the
-   text to the history list *) history_list := text2 :: !history_list;
-
-   (* Limit the history list to the last 5 entries *) history_list := take
-   !history_list;
-
-   (* Update the history label *) history_label#set_text (String.concat "\n"
-   (List.rev !history_list));
-
-   (* Clear the entry widget *) entry#set_text ""; () in *)
+(* Form of history; if you press the up key, you get your previous text entry
+   you wrote. *)
+let on_key_press entry event : bool =
+  let key = GdkEvent.Key.keyval event in
+  match key with
+  | 65362 (* GdkKeysyms._Up *) ->
+      let num_entries = List.length !previous_texts in
+      if num_entries > 0 then (
+        current_index := (!current_index - 1 + num_entries) mod num_entries;
+        entry#set_text (List.nth !previous_texts !current_index));
+      true
+  | 65364 ->
+      let num_entries = List.length !previous_texts in
+      if num_entries > 0 then
+        if !current_index = num_entries - 1 then entry#set_text ""
+        else (
+          current_index := (!current_index + 1) mod num_entries;
+          entry#set_text (List.nth !previous_texts !current_index));
+      true
+  | _ -> false
 
 (* Creates an about popup that explains *)
 let create_aboutpopup_dialog () =
@@ -237,6 +225,9 @@ let create_window () =
 
   entry#misc#modify_font_by_name "Times New Roman 22";
 
+  entry#event#add [ `KEY_PRESS ];
+  ignore (entry#event#connect#key_press ~callback:(on_key_press entry));
+
   (* Capitalize first letter of input *)
   ignore
     (entry#connect#changed ~callback:(fun () ->
@@ -269,6 +260,7 @@ let create_window () =
   let button_callback : unit -> unit =
    fun () ->
     let text1 = entry#text in
+    previous_texts := List.append !previous_texts [ text1 ];
     result_label#set_text
       (if text1 = "List" || check_string text1 then (
        result_label#misc#modify_font_by_name "Serif 16.5";
@@ -295,6 +287,9 @@ let create_window () =
   button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
 
   let red_color = GDraw.color (`NAME "red") in
+  ignore
+    (button#connect#enter ~callback:(fun () ->
+         button#misc#modify_bg [ (`ACTIVE, `COLOR red_color) ]));
   ignore
     (button#connect#enter ~callback:(fun () ->
          button#misc#modify_bg [ (`PRELIGHT, `COLOR red_color) ]));
