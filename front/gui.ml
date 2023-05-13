@@ -103,6 +103,7 @@ let take lst =
 (* Similar function from bin/main.ml that handles the input from the text entry
    but with major changes to handling certain cases. *)
 let handle cmd =
+  if String.contains ""
   let open Command in
   match cmd |> parse with
   | exception Empty -> "Please write in an argument!"
@@ -140,6 +141,27 @@ let scale_pixbuf pixbuf width height =
   GdkPixbuf.scale ~dest:new_pixbuf ~width ~height ~interp:`BILINEAR pixbuf;
   new_pixbuf
 
+let create_export_popup () =
+  let selected w () =
+    match w#filename with
+    | Some s ->
+        (* Executor.execute (Export (s ^ "/senstalk.md", [ "Sanders"; "Bernard" ])) *)
+        print_endline s; (* TODO change this*)
+        |> ignore
+    | None -> ()
+  in
+  let widget = GWindow.file_chooser_dialog `SELECT_FOLDER () in
+  (* let widget = GWindow.file_selection ~title:"File selection"
+     ~border_width:10 () in *)
+  print_endline "Export";
+  widget#add_select_button_stock `OK `OPEN;
+  widget#connect#current_folder_changed (selected widget) |> ignore;
+  (* ~callback:(selected widget) *)
+  (* ~callback:(selected widget) *)
+  widget#show ();
+  ignore (widget#run ());
+  widget#destroy ()
+
 (* Initial window with Welcome label and How-to label. Also with button to
    execute webscraping and a text entry field. Results are shown on a label
    below the text entry field. *)
@@ -175,6 +197,7 @@ let create_window () =
         `I ("About", fun () -> create_aboutpopup_dialog ());
         `I ("History", fun () -> print_endline "history");
         `I ("Help", fun () -> create_helppopup_dialog ());
+        `I ("Export", fun () -> create_export_popup ());
         `S;
         `I ("Quit", GMain.Main.quit);
       ];
