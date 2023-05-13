@@ -1,9 +1,10 @@
 open Gtk
 open GMain
 open GdkKeysyms
+open GdkPixbuf
+open Pango
 open Senate
 open Command
-open Pango
 
 (* Constants to avoid use of magic numbers*)
 let width_of_window = 1000
@@ -20,8 +21,6 @@ let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 30
-let width_of_historylabel = 60
-let height_of_historylabel = 40
 (* 
 
    let title_label = GMisc.label ~markup:"<b>History: </b>" ~packing:hbox#add ()
@@ -67,10 +66,10 @@ let create_aboutpopup_dialog () =
          Keaton-Camels. The team consists of Anya Khanna (netid: ak2243), \
          Dayana Soria Lopez (netid: dns64), Jordan Rudolph (netid: jmr489), \
          and Sohit Gurung (netid: sg857). Senate Stalker provides information \
-         on a Senator specified by the client such as Party, State, Address, \
-         Phone Number, Email, Website, and Committees the Senator is part of. \
+         on a senator specified by the client such as Party, State, Address, \
+         Phone Number, Email, Website, and Committees the senator is part of. \
          Users also have the option to download this information as well, in \
-         order to better understand our current Senators."
+         order to better understand our current senators."
       ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
   in
   dialog#set_position `CENTER_ALWAYS;
@@ -96,10 +95,10 @@ let create_helppopup_dialog () =
     GWindow.message_dialog
       ~message:
         "To get started, simply write either List to get a list of all the \
-         names of the Senators or Fetch followed by a name of a Senator and a \
-         field specifying what it is you want to know about the Senator. After \
-         if you want to save the information you found in a .md file, simply \
-         write Export followed by the pathname and name of Senator. "
+         names of the senators or Fetch followed by a name of a senator and a \
+         field specifying what it is you want to know about the senator. \
+         After, if you want to save the information you found in a .md file, \
+         simply write Export followed by the pathname and name of senator. "
       ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
   in
   dialog#set_position `CENTER_ALWAYS;
@@ -147,18 +146,23 @@ let check_string str =
   then true
   else false
 
-(* Change color of button after mouse stops hovering over it *)
-let change_color butt () =
-  let red_color = GDraw.color (`NAME "red") in
-  butt#misc#modify_bg [ (`NORMAL, `COLOR red_color) ]
+(* Scales image according to dimensions specified. *)
+let scale_pixbuf pixbuf width height =
+  let new_pixbuf = GdkPixbuf.create ~width ~height ~has_alpha:true () in
+  GdkPixbuf.scale ~dest:new_pixbuf ~width ~height ~interp:`BILINEAR pixbuf;
+  new_pixbuf
 
 (* Initial window with Welcome label and How-to label. Also with button to
    execute webscraping and a text entry field. Results are shown on a label
    below the text entry field. *)
 let create_window () =
+  let icon_pixbuf =
+    scale_pixbuf (GdkPixbuf.from_file "data/senatestalkerlogo.ico") 32 32
+  in
+
   let window =
     GWindow.window ~title:"Senate Stalker GUI" ~width:width_of_window
-      ~height:height_of_window ()
+      ~icon:icon_pixbuf ~height:height_of_window ()
   in
   ignore (window#connect#destroy ~callback:(fun () -> GMain.Main.quit ()));
 
@@ -247,19 +251,6 @@ let create_window () =
   button#misc#set_size_request ~width:width_of_button ~height:height_of_button
     ();
 
-  (* Function to allow enter key activate button press *)
-  ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
-
-  let orange_color = GDraw.color (`NAME "orange") in
-  button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
-
-  ignore (button#connect#enter ~callback:(fun () -> change_color button ()));
-
-  let orange_color = GDraw.color (`NAME "orange") in
-  ignore
-    (button#connect#leave ~callback:(fun () ->
-         button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ]));
-
   let font_desc = Pango.Font.from_string "Georgia 24" in
   let label = GMisc.label ~markup:"Stalk a <i>Senator</i>!" () in
   label#misc#modify_font font_desc;
@@ -273,7 +264,6 @@ let create_window () =
   result_label#misc#modify_font_by_name "Serif 24";
   result_label#set_line_wrap true;
   result_label#set_selectable true;
-
   result_label#set_justify `CENTER;
 
   let button_callback : unit -> unit =
@@ -292,12 +282,27 @@ let create_window () =
         handle text1));
 
     (* Clear the entry widget *)
-    entry#set_text "";
-    ()
+    entry#set_text ""
   in
 
   (* Connect the button click event to the callback function *)
-  ignore (button#connect#clicked ~callback:button_callback);
+  ignore (button#connect#clicked ~callback:(fun () -> button_callback ()));
+
+  (* Function to allow enter key activate button press *)
+  ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
+
+  let orange_color = GDraw.color (`NAME "orange") in
+  button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ];
+
+  let red_color = GDraw.color (`NAME "red") in
+  ignore
+    (button#connect#enter ~callback:(fun () ->
+         button#misc#modify_bg [ (`PRELIGHT, `COLOR red_color) ]));
+
+  let orange_color = GDraw.color (`NAME "orange") in
+  ignore
+    (button#connect#leave ~callback:(fun () ->
+         button#misc#modify_bg [ (`NORMAL, `COLOR orange_color) ]));
 
   window#show ();
   (entry, button, result_label)
