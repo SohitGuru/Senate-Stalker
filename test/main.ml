@@ -3,6 +3,7 @@ open Senate
 open Scraper
 open Command
 open Executor
+open Csv_parser
 
 (* Manual testing was done primarily for our GUI. All 4 members extensively
    checked and manually tested the GUI features and functionality. This also
@@ -34,6 +35,8 @@ let scraper_tests =
     ( "committtees test for invalid senator" >:: fun _ ->
       assert_raises UnknownSenator (fun () ->
           Scraper.Committees.exec "not a senator") );
+    ( "check list of senator length" >:: fun _ ->
+      assert_equal 100 (Scraper.Members.exec () |> List.length) );
   ]
 
 let make_parse_test (name : string) (command : string) (result : command) =
@@ -141,8 +144,28 @@ let fetch_tests =
       ];
   ]
 
+let make_row_test name r header expected =
+  name >:: fun _ -> assert_equal (row r header) expected
+
+let csv_tests =
+  let h1 = header_row "a,b,c" in
+  [
+    ("blank header" >:: fun _ -> assert_equal (header_row "") [ "" ]);
+    ("1 item header" >:: fun _ -> assert_equal (header_row "a") [ "a" ]);
+    ("2 item header" >:: fun _ -> assert_equal (header_row "a,b") [ "a"; "b" ]);
+    ("3 item header" >:: fun _ -> assert_equal h1 [ "a"; "b"; "c" ]);
+    make_row_test "typical row parsing case" "1,2,3" h1
+      [ ("a", "1"); ("b", "2"); ("c", "3") ];
+    make_row_test "escape a comma with double quotes" "\"1,2\",3,4" h1
+      [ ("a", "\"1,2\""); ("b", "3"); ("c", "4") ];
+    ( "Bad header (should raise exception)" >:: fun _ ->
+      assert_raises (Invalid_argument "Csv_parser.row") (fun () -> row "1,2" [])
+    );
+  ]
+
 let tests =
   "test suite for project"
-  >::: List.flatten [ scraper_tests; parse_tests; markdown_tests; fetch_tests ]
+  >::: List.flatten
+         [ scraper_tests; parse_tests; markdown_tests; fetch_tests; csv_tests ]
 
 let _ = run_test_tt_main tests

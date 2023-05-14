@@ -1,5 +1,23 @@
 (** This file handles data scraped/parsed from csv files (stored in "data/") *)
 
+val header_row : string -> string list
+(** [header_row rowtext] parses the header row of a csv file, which contains all
+    the attribute names for the rest of the file. It returns a list of strings,
+    where each string is one of the categories established by the header.
+
+    For example, [header_row "a,b,c"] would return [\["a"; "b"; "c"\]]*)
+
+val row : string -> string list -> (string * string) list
+(** [row r header] returns an association list in which each value represents
+    the value in [r] for the respective category in the parsed header [header].
+
+    For example [row "1,2,3" (header_row "a,b,c")] would return
+    [("a", "1"); ("b", "2"); ("c", "3")]
+
+    Raises [Invalid_argument] if the csv entry [r] is not compatible with the
+    header [header]. That is to say, the number of comma-separated-values in [r]
+    should equal [List.length header]. *)
+
 (** [Parser] is the module type for csv parsers in [Csv_parser] *)
 module type Parser = sig
   val path : string

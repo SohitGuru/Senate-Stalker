@@ -1,12 +1,4 @@
-module type Parser = sig
-  val path : string
-
-  type return
-  type input
-
-  val explanation : string
-  val exec : input -> return
-end
+let header_row (r : string) = String.split_on_char ',' r
 
 let count_char c =
   String.fold_left (fun acc c' -> if c = c' then acc + 1 else acc) 0
@@ -17,8 +9,6 @@ let rec handle_dq_esc (lst : string list) =
       if count_char '\"' a mod 2 = 1 then (a ^ "," ^ b) :: t |> handle_dq_esc
       else a :: handle_dq_esc (b :: t)
   | _ -> lst
-
-let header_row (r : string) = String.split_on_char ',' r
 
 let rec clean x =
   let x =
@@ -38,14 +28,26 @@ let rec clean x =
     end
 
 let row (r : string) (header : string list) =
-  List.map2
-    (fun r' h' -> (h', r'))
-    (String.split_on_char ',' r |> handle_dq_esc)
-    header
+  try
+    List.map2
+      (fun r' h' -> (h', r'))
+      (String.split_on_char ',' r |> handle_dq_esc)
+      header
+  with Invalid_argument _ -> raise (Invalid_argument "Csv_parser.row")
 
 let get_val (v : string) (header : string list) (r : string) =
   if List.exists (( = ) v) header then row r header |> List.assoc v |> clean
   else raise Not_found
+
+module type Parser = sig
+  val path : string
+
+  type return
+  type input
+
+  val explanation : string
+  val exec : input -> return
+end
 
 module DWNominate : Parser with type return = float with type input = string =
 struct
