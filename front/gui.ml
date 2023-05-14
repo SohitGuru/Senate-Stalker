@@ -19,11 +19,13 @@ let scuffedwidth_of_resultlabel = 975
 let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
+let padding_of_button = 5
 let spacing_between_boxes = 10
 let previous_texts = ref []
 let current_index = ref (-1)
 let width_of_historydialog = 300
 let height_of_historydialog = 250
+let height_of_erasedialog = 75
 
 (* Form of history; if you press the up key, you get your previous text entries
    you wrote. Press down to view more recent previous entries. *)
@@ -122,6 +124,35 @@ let to_bulleted_string lst =
       let lines = List.map (fun x -> bullet_point ^ x) lst in
       String.concat "\n" lines
 
+(* Erases all previous search entries. *)
+let erase_history () : bool =
+  if List.length !previous_texts <> 0 then (
+    previous_texts := [];
+    true)
+  else false
+
+(* Erase history pop-up. *)
+let create_erasehistory_dialog () =
+  let dialog =
+    GWindow.dialog ~position:`CENTER_ALWAYS ~height:height_of_erasedialog ()
+  in
+  let label = GMisc.label () in
+  if erase_history () then begin
+    label#set_text "Your history has been erased.";
+    dialog#set_title "Cleared"
+  end
+  else begin
+    label#set_text "Your history is empty, enter some commands to get started.";
+    dialog#set_title "Empty History"
+  end;
+  ignore (dialog#vbox#add label#coerce);
+  ignore (dialog#add_button_stock `CLOSE `CLOSE);
+
+  dialog#show ();
+  ignore (dialog#run ());
+  dialog#destroy ()
+
+(* Displays your search history. *)
 let create_history_dialog () =
   let dialog =
     GWindow.dialog ~title:"History" ~width:width_of_historydialog
@@ -132,6 +163,7 @@ let create_history_dialog () =
   in
   let _ = dialog#vbox#add label#coerce in
   let _ = dialog#add_button_stock `CLOSE `CLOSE in
+
   dialog#show ();
   ignore (dialog#run ());
   dialog#destroy ()
@@ -234,6 +266,7 @@ let create_window () =
       [
         `I ("About", fun () -> create_aboutpopup_dialog ());
         `I ("History", fun () -> create_history_dialog ());
+        `I ("Erase History", fun () -> create_erasehistory_dialog ());
         `I ("Help", fun () -> create_helppopup_dialog ());
         `I ("Export", fun () -> create_export_popup ());
         `S;
