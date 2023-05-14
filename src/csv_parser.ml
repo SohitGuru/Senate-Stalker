@@ -63,7 +63,8 @@ struct
 
   let explanation =
     "The score is on a scale from -1.0 to 1.0, where -1 is the most liberal \
-     and 1 is the most conservative. "
+     possible score and 1 is the most conservative. The Democratic Party \
+     median is -0.3455 and the Republican median is 0.541."
 
   let exec sen =
     try
