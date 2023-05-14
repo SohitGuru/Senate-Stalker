@@ -265,6 +265,8 @@ let create_window () =
         "To get a list of senators, please enter the command <b>List</b>\n\
          To get information on a specific senator, please enter <b>Fetch</b> \
          [<i>field</i>] [<i>full name of senator</i>] \n\
+         To save information on a specific senator, please enter <b>Export</b> \
+         [<i>path directory</i>] [<i>full name of senator</i>] \n\
          Supported values of [<i>field</i>] are: \n\
         \    Name\n\
         \    Party\n\
@@ -274,8 +276,7 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
-        \    Committees\n\
-        \    Export\n"
+        \    Committees\n"
       ~packing:vbox#add ()
   in
 

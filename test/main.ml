@@ -5,7 +5,10 @@ open Command
 open Executor
 
 (* Manual testing was done primarily for our GUI. All 4 members extensively
-   checked and manually tested the GUI features and functionality. *)
+   checked and manually tested the GUI features and functionality. This also
+   includes the terminal-based UI, where all members again, tested and checked
+   through all commands. The following tests verify the functions used in the
+   GUI and Terminal-based UI are correct. *)
 
 let senate_members_url =
   "https://www.senate.gov/general/contact_information/senators_cfm.xml"
