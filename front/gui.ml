@@ -309,6 +309,7 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
+        \    Nominate\n\
         \    Committees\n"
       ~packing:vbox#add ()
   in
@@ -385,9 +386,11 @@ let create_window () =
         result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
           ~height:normalheight_of_resultlabel ();
         handle text1));
-
-    (* Clear the entry widget *)
-    entry#set_text ""
+    if
+      result_label#text <> "Invalid Senator"
+      && result_label#text <> "Invalid argument"
+    then (* Clear the entry widget *)
+      entry#set_text ""
   in
 
   (* Connect the button click event to the callback function *)
