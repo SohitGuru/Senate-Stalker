@@ -1,6 +1,7 @@
 open Gtk
 open GMain
 open GdkKeysyms
+open GDraw
 open GdkPixbuf
 open Pango
 open Senate
@@ -9,6 +10,7 @@ open Command
 (* Constants to avoid use of magic numbers*)
 let width_of_window = 1000
 let height_of_window = 750
+let border_width_of_window = 5
 let x_coordinate_of_button = 10
 let y_coordinate_of_button = 10
 let max_length_of_text = 10
@@ -211,7 +213,8 @@ let create_window () =
   in
 
   let window =
-    GWindow.window ~title:"Senate Stalker GUI" ~width:width_of_window
+    GWindow.window ~title:"Senate Stalker GUI"
+      ~border_width:border_width_of_window ~width:width_of_window
       ~icon:icon_pixbuf ~height:height_of_window ()
   in
   ignore (window#connect#destroy ~callback:(fun () -> GMain.Main.quit ()));
@@ -219,6 +222,7 @@ let create_window () =
   window#set_position `CENTER;
   window#set_resizable true;
   window#set_modal true;
+  window#misc#realize ();
 
   let vbox = GPack.vbox ~spacing:spacing_between_boxes ~packing:window#add () in
 

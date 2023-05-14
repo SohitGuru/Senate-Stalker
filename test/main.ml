@@ -4,6 +4,9 @@ open Scraper
 open Command
 open Executor
 
+(* Manual testing was done primarily for our GUI. All 4 members extensively
+   checked and manually tested the GUI features and functionality. *)
+
 let senate_members_url =
   "https://www.senate.gov/general/contact_information/senators_cfm.xml"
 
