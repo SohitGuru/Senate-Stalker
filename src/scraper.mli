@@ -21,3 +21,7 @@ module Members : Parser with type return = Member.t list with type input = unit
 
 module Committees :
   Parser with type return = string list with type input = string
+(** [Committees.exec senator] returns a string list of the committee asignments
+    of Senator [senator]. [senator] should be formatted last name, then a comma,
+    then the first name, and then the middle initial. Raises [UnknownSenator] if
+    there is an error finding the senator or their committees.*)

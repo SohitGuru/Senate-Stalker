@@ -6,7 +6,7 @@ let rec read_list (inc : in_channel) (acc : string list) =
     close_in inc;
     acc
 
-let list_of_file f = read_list (open_in f) []
+let list_of_file f = read_list (open_in f) [] |> List.rev
 let string_of_file f = String.concat "\n" (list_of_file f)
 
 let write_str f s =

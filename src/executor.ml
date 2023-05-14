@@ -48,10 +48,13 @@ let execute (cmd : command) =
       |> List.map (fun member ->
              let open Member in
              first_name member ^ " " ^ last_name member)
-  | Fetch (x, y) -> (
+  | Fetch (x, y) -> begin
       match x with
       | Name ->
-          [ String.concat " " (List.rev y) ]
+          [
+            ( find_member y |> fun m ->
+              Member.last_name m ^ ", " ^ Member.first_name m );
+          ]
           (* name is what we receive as our input *)
       | Party -> [ find_member y |> Member.party ]
       | State -> [ find_member y |> Member.state ]
@@ -62,7 +65,16 @@ let execute (cmd : command) =
       | Class -> [ find_member y |> Member.class_num ]
       | Committees -> (
           try Scraper.Committees.exec (String.concat ", " y)
-          with UnknownSenator -> raise UnexpectedError))
+          with UnknownSenator -> raise UnexpectedError)
+      | DWNom ->
+          let open Member in
+          let m = find_member y in
+          let sen =
+            (last_name m |> String.uppercase_ascii) ^ ", " ^ first_name m
+          in
+          let open Csv_parser in
+          [ DWNominate.exec sen |> string_of_float; DWNominate.explanation ]
+    end
   | Export (path, sen) ->
       export path sen;
       [ "Data exported to " ^ path ]

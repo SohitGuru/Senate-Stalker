@@ -15,6 +15,7 @@ type field =
   | Website
   | Class
   | Committees
+  | DWNom
 
 (** [command] represents the command once parsed *)
 type command =
