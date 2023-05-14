@@ -64,7 +64,10 @@ let execute (cmd : command) =
       | Website -> [ find_member y |> Member.website ]
       | Class -> [ find_member y |> Member.class_num ]
       | Committees -> (
-          try Scraper.Committees.exec (String.concat ", " y)
+          try
+            Scraper.Committees.exec
+              ( find_member y |> fun m ->
+                Member.last_name m ^ ", " ^ Member.first_name m )
           with UnknownSenator -> raise UnexpectedError)
       | DWNom ->
           let open Member in

@@ -18,6 +18,19 @@ let scraper_tests =
         |> String.split_on_char '\n' |> List.hd)
         "<?xml version=\"1.0\" \
          encoding=\"UTF-8\"?><contact_information><member>" );
+    ( "Committees test for simple first/last name" >:: fun _ ->
+      assert_equal
+        (Scraper.Committees.exec "Welch, Peter")
+        [
+          "Committee on Agriculture, Nutrition, and Forestry";
+          "Committee on Commerce, Science, and Transportation";
+          "Committee on Rules and Administration";
+          "Committee on the Judiciary";
+          "Joint Economic Committee";
+        ] );
+    ( "committtees test for invalid senator" >:: fun _ ->
+      assert_raises UnknownSenator (fun () ->
+          Scraper.Committees.exec "not a senator") );
   ]
 
 let make_parse_test (name : string) (command : string) (result : command) =
@@ -95,7 +108,7 @@ let fetch_tests =
   [
     make_fetch_test "fetch name test"
       (Fetch (Name, [ "Sanders"; "Bernard" ]))
-      [ "Bernard Sanders" ];
+      [ "Sanders, Bernard" ];
     make_fetch_test "fetch party test"
       (Fetch (Party, [ "Sanders"; "Bernard" ]))
       [ "I" ];
