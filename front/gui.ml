@@ -1,6 +1,7 @@
 open Gtk
 open GMain
 open GdkKeysyms
+open GDraw
 open GdkPixbuf
 open Pango
 open Senate
@@ -9,9 +10,7 @@ open Command
 (* Constants to avoid use of magic numbers*)
 let width_of_window = 1000
 let height_of_window = 750
-let x_coordinate_of_button = 10
-let y_coordinate_of_button = 10
-let max_length_of_text = 10
+let border_width_of_window = 2
 let width_of_button = 15
 let height_of_button = 30
 let width_of_entry = 150
@@ -20,14 +19,11 @@ let scuffedwidth_of_resultlabel = 975
 let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
-let spacing_between_boxes = 30
+let spacing_between_boxes = 10
 let previous_texts = ref []
 let current_index = ref (-1)
 let width_of_historydialog = 300
 let height_of_historydialog = 250
-let spacing_between_boxes = 30
-let previous_texts = ref []
-let current_index = ref (-1)
 
 (* Form of history; if you press the up key, you get your previous text entries
    you wrote. Press down to view more recent previous entries. *)
@@ -211,7 +207,8 @@ let create_window () =
   in
 
   let window =
-    GWindow.window ~title:"Senate Stalker GUI" ~width:width_of_window
+    GWindow.window ~title:"Senate Stalker GUI"
+      ~border_width:border_width_of_window ~width:width_of_window
       ~icon:icon_pixbuf ~height:height_of_window ()
   in
   ignore (window#connect#destroy ~callback:(fun () -> GMain.Main.quit ()));
@@ -219,6 +216,7 @@ let create_window () =
   window#set_position `CENTER;
   window#set_resizable true;
   window#set_modal true;
+  window#misc#realize ();
 
   let vbox = GPack.vbox ~spacing:spacing_between_boxes ~packing:window#add () in
 
@@ -243,6 +241,13 @@ let create_window () =
       ];
 
   menu#set_border_width 1;
+
+  let _ =
+    GMisc.image
+      ~pixbuf:
+        (scale_pixbuf (GdkPixbuf.from_file "data/senatestalkerlogo.png") 64 64)
+      ~height:40 ~packing:vbox#add ()
+  in
 
   let firstlabel =
     GMisc.label ~text:"Senate Stalker: Learn more about our Senators!"
@@ -301,6 +306,11 @@ let create_window () =
              let capitalized_text = String.capitalize_ascii text in
              entry#set_text capitalized_text));
 
+  (* Shows a tool tip on the entry field *)
+  let tooltips = GData.tooltips () in
+  tooltips#set_tip entry#coerce ~text:"Type what you want to learn here!"
+    ~privat:"Private";
+
   let button = GButton.button ~packing:hbox#add () in
   button#misc#set_size_request ~width:width_of_button ~height:height_of_button
     ();
@@ -309,6 +319,12 @@ let create_window () =
   let label = GMisc.label ~markup:"Stalk a <i>Senator</i>!" () in
   label#misc#modify_font font_desc;
   button#add label#coerce;
+
+  (* Shows a tool tip on the button field *)
+  let tooltips = GData.tooltips () in
+  tooltips#set_tip button#coerce
+    ~text:"Click the button or press enter to process your command!"
+    ~privat:"Private";
 
   let result_label =
     GMisc.label ~text:"" ~height:normalheight_of_resultlabel
