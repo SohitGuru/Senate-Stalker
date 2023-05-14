@@ -11,9 +11,6 @@ open Command
 let width_of_window = 1000
 let height_of_window = 750
 let border_width_of_window = 2
-let x_coordinate_of_button = 10
-let y_coordinate_of_button = 10
-let max_length_of_text = 10
 let width_of_button = 15
 let height_of_button = 30
 let width_of_entry = 150
@@ -27,8 +24,6 @@ let previous_texts = ref []
 let current_index = ref (-1)
 let width_of_historydialog = 300
 let height_of_historydialog = 250
-let previous_texts = ref []
-let current_index = ref (-1)
 
 (* Form of history; if you press the up key, you get your previous text entries
    you wrote. Press down to view more recent previous entries. *)
