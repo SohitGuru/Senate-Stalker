@@ -20,8 +20,7 @@ let handle_part st open_delim d : string =
   if String.contains st open_delim then
     match String.split_on_char open_delim st with
     | [ preface; token ] -> (
-        try preface ^ List.assoc token d
-        with Dictionary.NotFound -> preface ^ st)
+        try preface ^ List.assoc token d with Not_found -> preface ^ st)
     | _ -> failwith "Bad input: " ^ st
   else st
 

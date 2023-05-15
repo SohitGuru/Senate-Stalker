@@ -30,7 +30,7 @@ let resize_map (m : ('k, 'v) t) =
   let bindings = bindings m in
   List.iter
     (fun (k, v) ->
-      let i = m.hash k mod Array.length new_arr in
+      let i = m.hash k mod Array.length new_arr |> Int.abs in
       let bucket = new_arr.(i) in
       new_arr.(i) <- (k, v) :: bucket)
     bindings;
@@ -49,7 +49,7 @@ let rec put k v m =
       | (k', v') :: t ->
           if k = k' then (k, v) :: t else (k', v') :: put_bucket (k, v) t
     in
-    let i = m.hash k mod Array.length m.arr in
+    let i = m.hash k mod Array.length m.arr |> Int.abs in
     let bucket = m.arr.(i) in
     m.arr.(i) <- put_bucket (k, v) bucket
 
@@ -59,7 +59,7 @@ let get (k : 'k) { hash; arr; size } =
     | [] -> raise Not_found
     | (k', v) :: t -> if k = k' then v else search_bucket k t
   in
-  let i = hash k mod Array.length arr in
+  let i = hash k mod Array.length arr |> Int.abs in
   search_bucket k arr.(i)
 
 let remove k m =
@@ -72,5 +72,5 @@ let remove k m =
           t)
         else (k', v) :: rem_bucket k t
   in
-  let i = m.hash k mod Array.length m.arr in
+  let i = m.hash k mod Array.length m.arr |> Int.abs in
   m.arr.(i) <- rem_bucket k m.arr.(i)

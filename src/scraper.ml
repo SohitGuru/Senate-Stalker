@@ -4,6 +4,11 @@ open Monad.Infix
 
 exception UnknownSenator
 
+let sen_hash (sen : string) : int =
+  let p1 = 53 in
+  let p2 = 97 in
+  String.fold_left (fun h c -> (h * p2) + Char.code c) p1 sen
+
 let content_string_action (url : string) =
   Agent.get url >|= fun result -> result |> Agent.HttpResponse.content
 
@@ -88,7 +93,7 @@ module Committees :
   type return = string list
   type input = string
 
-  let dict : (input, return) Dictionary.t ref = ref Dictionary.empty
+  let m : (input, return) Map.t = Map.make sen_hash 50
 
   open Soup
 
@@ -126,10 +131,10 @@ module Committees :
       then the first name, and then the middle initial. Raises [UnknownSenator]
       if there is an error finding the senator or their committees. s*)
   let exec senator =
-    try Dictionary.find senator !dict
-    with Dictionary.NotFound ->
+    try Map.get senator m
+    with Not_found ->
       let _, ret = action_runner (committees senator) in
-      dict := Dictionary.insert senator ret !dict;
+      Map.put senator ret m;
       ret
 end
 
@@ -142,7 +147,8 @@ struct
 
   let url = "https://www.fec.gov"
   let search = "/data/search/?search="
-  let dict : (input, return) Dictionary.t ref = ref Dictionary.empty
+  let map : (input, return) Map.t = Map.make sen_hash 50
+  (* used to store results since it's hard to compute*)
 
   let search sen =
     let open Page in
@@ -177,12 +183,12 @@ struct
       fetch_indiv_contributions s )
 
   let exec senator =
-    try Dictionary.find senator !dict
-    with Dictionary.NotFound ->
+    try Map.get senator map
+    with Not_found ->
       let _, d = action_runner (search senator) in
       let _, tup = action_runner (fetch d) in
       let ret = Finance.make tup in
-      dict := Dictionary.insert senator ret !dict;
+      Map.put senator ret map;
       ret
 end
 
