@@ -1,5 +1,11 @@
+(** Executor is responsible for the execution of [Command.command] objects *)
+
 exception BadArgument
+(** [BadArgument] is thrown when an argument causes an error in execution *)
+
 exception UnexpectedError
+(** [UnexpectedError] is thrown when an unforseeable and possibly
+    un-duplicatable error occurs, such as a connection error. *)
 
 val execute : Command.command -> string list
 (** [execute] is responsible for calling the correct functions necessary to

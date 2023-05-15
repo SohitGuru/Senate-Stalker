@@ -1,6 +1,7 @@
 (** Representation type of campaign finance data for a senator *)
 
 type t
+(** [t] is the abstract type for a finance object *)
 
 val make : string * string * string -> t
 (** [make (a, b, c)] makes a campaign finance entry where the total receipts

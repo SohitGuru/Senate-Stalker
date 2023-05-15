@@ -1,3 +1,6 @@
+(** Markdown manages file I/O and snippet replacement used in the exporting of
+    markdown files *)
+
 val list_of_file : string -> string list
 (** [list_of_file path] reads the file line-by-line into a list of strings
     (where each item is a line), which is returned. *)

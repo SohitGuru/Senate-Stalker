@@ -1,4 +1,7 @@
+(** Manages the web-scraping necessary to collect various forms of information *)
+
 exception UnknownSenator
+(** [UnknownSenator] is thrown when a senator is not found while scraping *)
 
 val content_to_string : string -> string
 (** [content_to_string url] fetches the content of the webpage at [url] and
