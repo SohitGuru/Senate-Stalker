@@ -43,12 +43,13 @@ let export (path : string) (sen : arg_phrase) =
 
 let rec format_stocks_list stocks_list =
   match stocks_list with
-  | [] -> ""
+  | [] -> []
   | h :: t ->
-      "Name: " ^ Stockinfo.company h ^ "\nType: "
+      ("Name: " ^ Stockinfo.company h ^ "\nType: "
       ^ Stockinfo.transaction_type h
       ^ "\nAmount: " ^ Stockinfo.amount h ^ "\nTrade date: "
-      ^ Stockinfo.trade_date h ^ "\n---\n" ^ format_stocks_list t
+      ^ Stockinfo.trade_date h ^ "\n---\n")
+      :: format_stocks_list t
 
 let execute (cmd : command) =
   match cmd with
@@ -110,7 +111,8 @@ let execute (cmd : command) =
                   Member.first_name m ^ " " ^ Member.last_name m )
             with UnknownSenator -> raise UnexpectedError
           in
-          if (stocks_list = []) then ["No trades found"] else [ format_stocks_list stocks_list ]
+          if stocks_list = [] then [ "No trades found" ]
+          else format_stocks_list stocks_list
     end
   | Export (path, sen) ->
       export path sen;
