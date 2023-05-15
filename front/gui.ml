@@ -36,7 +36,7 @@ let on_key_press entry event : bool =
   | 65362 (* GdkKeysyms._Up *) ->
       let num_entries = List.length !previous_texts in
       if num_entries > 0 then (
-        current_index := (!current_index - 1) mod num_entries;
+        current_index := (!current_index - 1 + num_entries) mod num_entries;
         entry#set_text (List.nth !previous_texts !current_index));
       true
   | 65364 (* GdkKeysyms._Down *) ->
