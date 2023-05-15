@@ -39,7 +39,6 @@ let on_key_press entry event : bool =
       let num_entries = List.length !previous_texts in
       if num_entries > 0 then (
         current_index := (!current_index - 1) mod num_entries;
-        if !current_index < 0 then current_index := num_entries - 1;
         entry#set_text (List.nth !previous_texts !current_index));
       true
   | 65364 (* GdkKeysyms._Down *) ->
@@ -251,8 +250,8 @@ let check_string str =
 let button_callback (entry : GEdit.entry) (result_label : GMisc.label)
     (scrolled_window : GBin.scrolled_window) () =
   let text1 = entry#text in
-  if text1 <> "" && text1 <> "Clear" then
-    previous_texts := List.append !previous_texts [ text1 ];
+  if text1 <> "" && text1 <> "Clear" then current_index := !current_index + 1;
+  previous_texts := List.append !previous_texts [ text1 ];
   result_label#set_text
     (if text1 = "List" || check_string text1 then (
      result_label#misc#modify_font_by_name "Serif 16.5";
