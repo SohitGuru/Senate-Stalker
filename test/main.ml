@@ -198,6 +198,9 @@ let fetch_tests =
     ( "fetch nonexistent senator name" >:: fun _ ->
       assert_raises BadArgument (fun () ->
           Executor.execute (Fetch (Name, [ "nonexistent senator" ]))) );
+    ( "fetch nonexistent senator party" >:: fun _ ->
+      assert_raises BadArgument (fun () ->
+          Executor.execute (Fetch (Party, [ "nonexistent senator" ]))) );
     ( "fetch nonexistent senator committees" >:: fun _ ->
       assert_raises BadArgument (fun () ->
           Executor.execute (Fetch (Committees, [ "nonexistent senator" ]))) );
