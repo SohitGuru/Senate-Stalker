@@ -40,3 +40,10 @@ module FEC : Parser with type return = Finance.t with type input = string
 
     Raises [UnknownSenator] if there is an error finding the senator or their
     campaign finance data. *)
+
+module Stocks :
+  Parser with type return = Stockinfo.t list with type input = string
+(** [Stocks.exec senator] returns a string list of all the recorded stock trades
+    of a Senator [senator]. [senator] should be in the form of "[first name]
+    [middle initial] [last name]". Returns the empty list if no trades have been
+    logged for that specific senator.*)

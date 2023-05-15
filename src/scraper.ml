@@ -204,27 +204,42 @@ module Stocks :
     | [] -> ""
     | h :: t -> h ^ "%20" ^ fill_spaces_rec t
 
-  let fill_spaces str = String.split_on_char ' ' str |> fill_spaces_rec
+  let fill_spaces str =
+    String.split_on_char ' ' str |> fill_spaces_rec |> fun x ->
+    String.sub x 0 (String.length x - 3)
 
   let rec remove_leading_spaces str =
-    if String.length str >= 1 && str.[0] = ' ' then
+    if String.length str >= 1 && (str.[0] = ' ' || str.[0] = '\n') then
       remove_leading_spaces (String.sub str 1 (String.length str - 1))
+    else str
+
+  let rec remove_trailing_spaces str =
+    let str_length = String.length str in
+    if
+      str_length >= 1
+      && (str.[str_length - 1] = ' ' || str.[str_length - 1] = '\n')
+    then remove_trailing_spaces (String.sub str 0 (String.length str - 1))
     else str
 
   let eval_node nd =
     let spans = nd $$ "span" |> to_list in
     let spans_eval span_num =
-      remove_leading_spaces
-        (List.nth
-           (String.split_on_char '\n' (List.nth spans span_num |> to_string))
-           1)
+      (match List.nth spans span_num |> leaf_text with
+      | None -> ""
+      | Some s -> s)
+      |> remove_leading_spaces |> remove_trailing_spaces
+      (*remove_leading_spaces (List.nth (String.split_on_char '\n' (List.nth
+        spans span_num |> to_string)) 1)*)
     in
+    let span_const = if spans_eval 0 <> "-" then 1 else 0 in
     let company =
-      spans_eval 1 ^ ", which is an asset of type " ^ spans_eval 2
+      spans_eval (1 + span_const)
+      ^ ", which is an asset of type "
+      ^ spans_eval (2 + span_const)
     in
-    let transaction_type = spans_eval 3 in
-    let amount = spans_eval 4 in
-    let a_list = nd $$ "span" |> to_list in
+    let transaction_type = spans_eval (3 + span_const) in
+    let amount = spans_eval (4 + span_const) in
+    let a_list = nd $$ "a" |> to_list in
     let trade_date =
       remove_leading_spaces
         (List.nth
@@ -253,7 +268,7 @@ module Stocks :
     senator_page >|= fun x ->
     if
       x $? "p:contains(\"No trading activity found for this politician.\")"
-      = None
+      <> None
     then []
     else make_trades_list x
   (*if senator_page $ "p:contains(\"No trading activity found for this

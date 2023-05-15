@@ -41,6 +41,15 @@ let export (path : string) (sen : arg_phrase) =
   List.map (fun st -> Markdown.replace_snippet st d) originals
   |> List.rev |> Markdown.write_list path
 
+let rec format_stocks_list stocks_list =
+  match stocks_list with
+  | [] -> ""
+  | h :: t ->
+      "Name: " ^ Stockinfo.company h ^ "\nType: "
+      ^ Stockinfo.transaction_type h
+      ^ "\nAmount: " ^ Stockinfo.amount h ^ "\nTrade date: "
+      ^ Stockinfo.trade_date h ^ "\n---\n" ^ format_stocks_list t
+
 let execute (cmd : command) =
   match cmd with
   | List ->
@@ -93,6 +102,15 @@ let execute (cmd : command) =
               ^ indiv_contributions f;
             ]
           with UnknownSenator -> raise UnexpectedError)
+      | Stocks ->
+          let stocks_list =
+            try
+              Scraper.Stocks.exec
+                ( find_member y |> fun m ->
+                  Member.first_name m ^ " " ^ Member.last_name m )
+            with UnknownSenator -> raise UnexpectedError
+          in
+          [ format_stocks_list stocks_list ]
     end
   | Export (path, sen) ->
       export path sen;

@@ -17,6 +17,7 @@ type field =
   | Committees
   | DWNom
   | Finance
+  | Stocks
 
 (** [command] represents the command once parsed *)
 type command =
