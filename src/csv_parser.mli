@@ -44,3 +44,11 @@ module DWNominate : Parser with type return = float with type input = string
     DW-nominate for [senator]. Note: the [senator] string must be formatted like
     so: ["<LAST NAME>, <first name>"]. For example,
     [DWNominate.exec "WARREN, Elizabeth"] yields [-0.751]. *)
+
+module Approval :
+  Parser with type return = string * string with type input = string
+(** [Approval] is the module that gets the approval rating information for any
+    given senator. [Approval.exec senator] returns a pair of integers, where the
+    first is the senator's net approval rating and the second is the state's
+    partisan leaning. Note: the [senator] string must simply be the last name of
+    the senatorl with the first letter capitalized. *)

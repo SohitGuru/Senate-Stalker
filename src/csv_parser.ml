@@ -76,3 +76,35 @@ struct
       |> float_of_string
     with Not_found -> raise Scraper.UnknownSenator
 end
+
+module Approval :
+  Parser with type return = string * string with type input = string = struct
+  let path = "data/approval.csv"
+
+  let csv =
+    lazy
+      (let open Markdown in
+      list_of_file path)
+
+  let headers = lazy (header_row (List.hd (Lazy.force csv)))
+
+  type input = string
+  type return = string * string
+
+  let explanation =
+    "The approval rating is the Senator's net approval rating. For example, a \
+     +30 value means that 80% of the people approve of the job the senator is \
+     doing. A higher approval rating is better. The state partisan leaning \
+     provides context into the environment in which the senator is operating."
+
+  let exec sen =
+    try
+      let row =
+        Lazy.force csv
+        |> List.find (fun x -> get_val "Name" (Lazy.force headers) x = sen)
+      in
+      let v1 = get_val "Net Approval" (Lazy.force headers) row in
+      let v2 = get_val "State Partisan Lean" (Lazy.force headers) row in
+      (v1, v2)
+    with Not_found -> raise Scraper.UnknownSenator
+end

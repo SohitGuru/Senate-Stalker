@@ -18,6 +18,7 @@ type field =
   | DWNom
   | Finance
   | Stocks
+  | Approval
 
 (** [command] represents the command once parsed *)
 type command =

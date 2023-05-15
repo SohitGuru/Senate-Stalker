@@ -13,6 +13,7 @@ type field =
   | DWNom
   | Finance
   | Stocks
+  | Approval
 
 type command =
   | Fetch of field * arg_phrase
@@ -52,6 +53,7 @@ let fetch_field str =
   | "Nominate" -> DWNom
   | "Finance" -> Finance
   | "Stocks" -> Stocks
+  | "Approval" -> Approval
   | _ -> raise Invalid
 
 let fetch_path str =

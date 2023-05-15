@@ -78,12 +78,10 @@ let execute (cmd : command) =
       | Email -> [ find_member y |> Member.email ]
       | Website -> [ find_member y |> Member.website ]
       | Class -> [ find_member y |> Member.class_num ]
-      | Committees -> (
-          try
-            Scraper.Committees.exec
-              ( find_member y |> fun m ->
-                Member.last_name m ^ ", " ^ Member.first_name m )
-          with UnknownSenator -> raise UnexpectedError)
+      | Committees ->
+          Scraper.Committees.exec
+            ( find_member y |> fun m ->
+              Member.last_name m ^ ", " ^ Member.first_name m )
       | DWNom ->
           let open Member in
           let m = find_member y in
@@ -118,6 +116,16 @@ let execute (cmd : command) =
           in
           if stocks_list = [] then [ "No trades found" ]
           else format_stocks_list stocks_list
+      | Approval ->
+          let open Member in
+          let m = find_member y |> last_name in
+          let open Csv_parser in
+          let v1, v2 = Csv_parser.Approval.exec m in
+          [
+            "Approval Rating: " ^ v1;
+            "State Partisan Leaning: " ^ v2;
+            Csv_parser.Approval.explanation;
+          ]
     end
   | Export (path, sen) ->
       export path sen;
