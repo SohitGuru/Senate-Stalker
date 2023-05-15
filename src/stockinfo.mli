@@ -1,5 +1,7 @@
-type t
 (**Representation of a singular trade a Senator has made*)
+
+type t
+(**Abstract type representing stock trades*)
 
 val make : string * string * string * string -> t
 (**[make (comp, tt, amt, td)] creates a value of type t*)
