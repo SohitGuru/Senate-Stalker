@@ -8,16 +8,14 @@ open Senate
 open Command
 
 (* Constants to avoid use of magic numbers*)
-let width_of_window = 1000
+let width_of_window = 1100
 let height_of_window = 765
 let border_width_of_window = 2
 let width_of_button = 15
 let height_of_button = 30
 let width_of_entry = 150
 let height_of_entry = 50
-let scuffedwidth_of_resultlabel = 975
-let scuffedheight_of_resultlabel = 225
-let normalwidth_of_resultlabel = 400
+let normalwidth_of_resultlabel = 600
 let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 10
 let spacing_between_entry_and_button = 25
@@ -190,15 +188,11 @@ let handle cmd =
   | List -> Executor.execute List |> String.concat ", "
   | Fetch (f, o) -> (
       let open Executor in
-      try
-        execute (Fetch (f, o))
-        |> String.concat (if f = Committees then ", " else "\n")
-      with
+      try execute (Fetch (f, o)) |> String.concat "\n" with
       | BadArgument -> "Invalid Senator"
       | UnexpectedError ->
           create_popup_dialog ();
           "")
-  (* Need to handle Export case *)
   | Export (p, s) -> (
       try String.concat "\n" (Executor.execute (Export (p, s)))
       with _ -> "An error occured")
@@ -255,10 +249,6 @@ let button_callback (entry : GEdit.entry) (result_label : GMisc.label)
   result_label#set_text
     (if text1 = "List" || check_string text1 then (
      result_label#misc#modify_font_by_name "Serif 16.5";
-     scrolled_window#misc#set_size_request ~width:scuffedwidth_of_resultlabel
-       ~height:scuffedheight_of_resultlabel ();
-     result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
-       ~height:scuffedheight_of_resultlabel ();
      handle text1)
     else if text1 = "Clear" (* Clear all search results and entry text *) then (
       result_label#misc#modify_font_by_name "Serif 24";
@@ -503,16 +493,16 @@ let create_window () =
     ~privat:"Private";
 
   let scrolled_window =
-    GBin.scrolled_window ~packing:vbox#add ~width:normalwidth_of_resultlabel
-      ~height:normalheight_of_resultlabel ()
+    GBin.scrolled_window ~packing:vbox#add ~hpolicy:`AUTOMATIC
+      ~vpolicy:`AUTOMATIC ~border_width:border_width_of_window
+      ~width:normalwidth_of_resultlabel ~height:normalheight_of_resultlabel
+      ~show:true ()
   in
-  scrolled_window#set_hpolicy `AUTOMATIC;
-  scrolled_window#set_vpolicy `AUTOMATIC;
   scrolled_window#set_shadow_type `OUT;
+  scrolled_window#set_placement `TOP_LEFT;
 
   let result_label =
-    GMisc.label ~text:"" ~height:normalheight_of_resultlabel
-      ~width:normalwidth_of_resultlabel
+    GMisc.label ~text:"" ~width:normalwidth_of_resultlabel
       ~packing:scrolled_window#add_with_viewport ()
   in
 
@@ -521,7 +511,7 @@ let create_window () =
   result_label#set_selectable true;
   result_label#set_ellipsize `NONE;
   result_label#set_justify `CENTER;
-
+  result_label#set_use_markup true;
   (* Connect the button click event to the callback function *)
   ignore
     (button#connect#clicked ~callback:(fun () ->
