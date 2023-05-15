@@ -268,7 +268,28 @@ module Stocks :
     in
     make_trades_list_rec tbody_filtered
 
-  let trades senator =
+  let rec first_name str =
+    match str with
+    | "" -> ""
+    | _ -> (
+        let fl = String.sub str 0 1 in
+        match fl with
+        | " " -> ""
+        | _ -> fl ^ first_name (String.sub str 1 (String.length str - 1)))
+
+  let rec last_name str =
+    match str with
+    | "" -> ""
+    | _ -> (
+        let str_length = String.length str in
+        let ll = String.sub str (str_length - 1) 1 in
+        match ll with
+        | " " -> ""
+        | _ -> last_name (String.sub str 0 (str_length - 1)) ^ ll)
+
+  let rec remove_mi str = first_name str ^ " " ^ last_name str
+
+  let trades_attempt senator =
     let formatted_url = url ^ fill_spaces senator ^ "?" in
     let senator_page = page_of_url formatted_url >|= Page.soup in
     senator_page >|= fun x ->
@@ -277,11 +298,14 @@ module Stocks :
       <> None
     then []
     else make_trades_list x
-  (*if senator_page $ "p:contains(\"No trading activity found for this
-    politician.\")" then "No trading activity found for this politician." else
-    failwith "Unimplemented"*)
 
-  let exec senator =
-    let _, lst = action_runner (trades senator) in
-    lst
+  let trades senator =
+    let possible_mi = trades_attempt senator in
+    let _, lst = action_runner possible_mi in
+    if lst <> [] then lst
+    else
+      let _, lst2 = action_runner (trades_attempt (remove_mi senator)) in
+      lst2
+
+  let exec senator = trades senator
 end
