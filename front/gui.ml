@@ -14,13 +14,13 @@ let border_width_of_window = 2
 let width_of_button = 15
 let height_of_button = 30
 let width_of_entry = 150
-let height_of_entry = 40
+let height_of_entry = 50
 let scuffedwidth_of_resultlabel = 975
 let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
 let spacing_between_boxes = 10
-let spacing_between_entry_and_button = 20
+let spacing_between_entry_and_button = 25
 let previous_texts = ref []
 let current_index = ref (-1)
 let width_of_historydialog = 300
@@ -302,11 +302,13 @@ let get_senator_popup s =
       ~destroy_with_parent:true ~position:`CENTER_ALWAYS ()
   in
   let entry = GEdit.entry ~width:width_of_entry ~height:height_of_entry () in
-  entry#misc#modify_font_by_name "Times New Roman 22";
-  let font_desc = Pango.Font.from_string "Georgia 24" in
+  entry#misc#modify_font_by_name "Times New Roman 24";
+  let font_desc = Pango.Font.from_string "Georgia 28" in
   let label = GMisc.label ~markup:"<b>Export</b>" () in
   label#misc#modify_font font_desc;
   let button = GButton.button () in
+  button#misc#set_size_request ~width:width_of_button ~height:height_of_button
+    ();
   button#add label#coerce;
   let vbox =
     GPack.vbox ~packing:dialog#vbox#add
