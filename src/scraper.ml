@@ -88,6 +88,8 @@ module Committees :
   type return = string list
   type input = string
 
+  let dict : (input, return) Dictionary.t ref = ref Dictionary.empty
+
   open Soup
 
   (**[senator_of_page senator page] finds the node corresponding to [senator] in
@@ -124,8 +126,11 @@ module Committees :
       then the first name, and then the middle initial. Raises [UnknownSenator]
       if there is an error finding the senator or their committees. s*)
   let exec senator =
-    let _, lst = action_runner (committees senator) in
-    lst
+    try Dictionary.find senator !dict
+    with Dictionary.NotFound ->
+      let _, ret = action_runner (committees senator) in
+      dict := Dictionary.insert senator ret !dict;
+      ret
 end
 
 module FEC : Parser with type return = Finance.t with type input = string =
@@ -137,6 +142,7 @@ struct
 
   let url = "https://www.fec.gov"
   let search = "/data/search/?search="
+  let dict : (input, return) Dictionary.t ref = ref Dictionary.empty
 
   let search sen =
     let open Page in
@@ -171,7 +177,11 @@ struct
       fetch_indiv_contributions s )
 
   let exec senator =
-    let _, d = action_runner (search senator) in
-    let _, tup = action_runner (fetch d) in
-    Finance.make tup
+    try Dictionary.find senator !dict
+    with Dictionary.NotFound ->
+      let _, d = action_runner (search senator) in
+      let _, tup = action_runner (fetch d) in
+      let ret = Finance.make tup in
+      dict := Dictionary.insert senator ret !dict;
+      ret
 end
