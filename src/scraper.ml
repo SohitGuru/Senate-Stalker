@@ -214,11 +214,15 @@ module Stocks :
     String.split_on_char ' ' str |> fill_spaces_rec |> fun x ->
     String.sub x 0 (String.length x - 3)
 
+  (*[remove_leading_spaces str] removes all whitespace and \n from the beginning
+    of str, stopping when it reaches a character that is not whitespace or \n*)
   let rec remove_leading_spaces str =
     if String.length str >= 1 && (str.[0] = ' ' || str.[0] = '\n') then
       remove_leading_spaces (String.sub str 1 (String.length str - 1))
     else str
 
+  (*[remove_trailing_spaces str] removes all whitespace and \n from the end of
+    str, stopping when it reaches a character that is not whitespace or \n*)
   let rec remove_trailing_spaces str =
     let str_length = String.length str in
     if
@@ -227,6 +231,9 @@ module Stocks :
     then remove_trailing_spaces (String.sub str 0 (String.length str - 1))
     else str
 
+  (*[eval_node nd] returns a value of type Stockinfo.t that represents a
+    singular trade made by a senator if nd is a properly formatted node that was
+    fetched during webscraping.*)
   let eval_node nd =
     let spans = nd $$ "span" |> to_list in
     let spans_eval span_num =
@@ -234,8 +241,8 @@ module Stocks :
       | None -> ""
       | Some s -> s)
       |> remove_leading_spaces |> remove_trailing_spaces
-      (*remove_leading_spaces (List.nth (String.split_on_char '\n' (List.nth
-        spans span_num |> to_string)) 1)*)
+      (*leading and trailing spaces are variable, thus requiring the use of
+        specialized functions*)
     in
     let span_const = if spans_eval 0 <> "-" then 1 else 0 in
     let company =
@@ -254,11 +261,19 @@ module Stocks :
     in
     Stockinfo.make (company, transaction_type, amount, trade_date)
 
+  (*[make_trades_list_rec tbody_filtered] returns a list of values of type
+    stockinfo.t, which in total represents all the recorded trades made by a
+    single senator if tbody_filtered is a properly formatted list of nodes in
+    that was fetched during webscraping and filtered of unused nodes.*)
   let rec make_trades_list_rec tbody_filtered =
     match tbody_filtered with
     | [] -> []
     | h :: t -> eval_node h :: make_trades_list_rec t
 
+  (*[make_trades_list senator_page] returns a list of values of type
+    stockinfo.t, which in total represents all the recorded trades made by a
+    single senator if senator_page is a properly formatted node that was fetched
+    during webscraping.*)
   let make_trades_list senator_page =
     let tbody = senator_page $ "tbody" in
     let tbody_filtered =
@@ -268,6 +283,8 @@ module Stocks :
     in
     make_trades_list_rec tbody_filtered
 
+  (*[first_name str] returns the first sequence of characters that is not
+    interupted by a space in str*)
   let rec first_name str =
     match str with
     | "" -> ""
@@ -277,6 +294,8 @@ module Stocks :
         | " " -> ""
         | _ -> fl ^ first_name (String.sub str 1 (String.length str - 1)))
 
+  (*[last_name str] returns the last sequence of characters that is not
+    interupted by a space in str*)
   let rec last_name str =
     match str with
     | "" -> ""
@@ -287,8 +306,13 @@ module Stocks :
         | " " -> ""
         | _ -> last_name (String.sub str 0 (str_length - 1)) ^ ll)
 
+  (*[remove_mi str] removes all but the first and last word contatined in str*)
   let rec remove_mi str = first_name str ^ " " ^ last_name str
 
+  (*[trades_attempt senator] returns a Monad list of Stockinfo.t, which by
+    itself represents every recorded trade a senator has made, if senator is the
+    name of a senator that is logged on the website used for webscraping,
+    otherwise returns the empty list*)
   let trades_attempt senator =
     let formatted_url = url ^ fill_spaces senator ^ "?" in
     let senator_page = page_of_url formatted_url >|= Page.soup in
@@ -299,6 +323,11 @@ module Stocks :
     then []
     else make_trades_list x
 
+  (*[trades senator] returns a list of values of type stockinfo.t, which in
+    total represents all the recorded trades made by a single senator if senator
+    is the name of a senator logged in the website used for webscraping, or
+    senator is the name of a senator logged in the website used for webscraping
+    once its middle initial is removed*)
   let trades senator =
     let possible_mi = trades_attempt senator in
     let _, lst = action_runner possible_mi in
