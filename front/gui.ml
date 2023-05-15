@@ -309,6 +309,7 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
+        \    Nominate\n\
         \    Committees\n"
       ~packing:vbox#add ()
   in
@@ -373,21 +374,29 @@ let create_window () =
   let button_callback : unit -> unit =
    fun () ->
     let text1 = entry#text in
-    if text1 <> "" then previous_texts := List.append !previous_texts [ text1 ];
+    if text1 <> "" && text1 <> "Clear" then
+      previous_texts := List.append !previous_texts [ text1 ];
     result_label#set_text
       (if text1 = "List" || check_string text1 then (
        result_label#misc#modify_font_by_name "Serif 16.5";
        result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
          ~height:scuffedheight_of_resultlabel ();
        handle text1)
+      else if text1 = "Clear" (* Clear all search results and entry text *) then (
+        result_label#misc#modify_font_by_name "Serif 24";
+        result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
+          ~height:normalheight_of_resultlabel ();
+        "")
       else (
         result_label#misc#modify_font_by_name "Serif 24";
         result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
           ~height:normalheight_of_resultlabel ();
         handle text1));
-
-    (* Clear the entry widget *)
-    entry#set_text ""
+    if
+      result_label#text <> "Invalid Senator"
+      && result_label#text <> "Invalid argument"
+    then (* Clear the entry widget *)
+      entry#set_text ""
   in
 
   (* Connect the button click event to the callback function *)

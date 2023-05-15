@@ -7,6 +7,8 @@ let help_message =
   "To get a list of senators, please enter the command \'List\'\n\
    To get information on a specific senator, please enter \'Fetch [field] \
    [full name of senator] \'\n\
+   To save information on a specific senator, please enter \'Export [path \
+   directory] [full name of senator] \'\n\
    Supported values of [field] are: \n\
   \    Name\n\
   \    Party\n\
@@ -16,8 +18,8 @@ let help_message =
   \    Email\n\
   \    Website\n\
   \    Class\n\
-  \    Committees\n\
-  \    Export\n"
+  \    Nominate\n\
+  \    Committees\n"
 
 let prompt = "> "
 
