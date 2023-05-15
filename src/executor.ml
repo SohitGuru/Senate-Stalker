@@ -110,7 +110,7 @@ let execute (cmd : command) =
                   Member.first_name m ^ " " ^ Member.last_name m )
             with UnknownSenator -> raise UnexpectedError
           in
-          [ format_stocks_list stocks_list ]
+          if (stocks_list = []) then ["No trades found"] else [ format_stocks_list stocks_list ]
     end
   | Export (path, sen) ->
       export path sen;
