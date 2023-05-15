@@ -457,6 +457,7 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
+        \    Stocks\n\
         \    Nominate\n\
         \    Committees\n"
       ~packing:vbox#add ()
