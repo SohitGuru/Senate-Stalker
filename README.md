@@ -6,7 +6,7 @@ CS 3110 Final Project: *Senate Stalker*
 </p>
 
 # About 
-*Senate Stalker* is a program that helps you learn more about the U.S. senators! Simply type `make gui` or `make repl` to get the program started. Once you're done with your stalking 👀, save what you learned about a senator in a markdown file so that you are best prepared for the next senate elections! 👍
+Welcome to the official github repository for *Senate Stalker*, a program that helps you learn more about the U.S. senators! Simply type `make gui` or `make repl` to get the program started. Once you're done with your stalking 👀, save what you learned about a senator in a markdown file so that you are best prepared for the next senate elections! 👍
 
 Happy stalking <3 🕵️
 
