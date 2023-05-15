@@ -287,7 +287,7 @@ let display_popup s =
   (* create a popup with the text s *)
   let dialog =
     GWindow.message_dialog ~message:s ~buttons:GWindow.Buttons.ok
-      ~message_type:`INFO ~destroy_with_parent:true ()
+      ~message_type:`INFO ~destroy_with_parent:true ~modal:true ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
