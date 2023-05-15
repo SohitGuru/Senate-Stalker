@@ -4,12 +4,27 @@ open Scraper
 open Command
 open Executor
 open Csv_parser
+(*****************************************************************)
 
-(* Manual testing was done primarily for our GUI. All 4 members extensively
+(* TEST PLAN
+
+   Manual testing was done primarily for our GUI. All 4 members extensively
    checked and manually tested the GUI features and functionality. This also
    includes the terminal-based UI, where all members again, tested and checked
    through all commands. The following tests verify the functions used in the
-   GUI and Terminal-based UI are correct. *)
+   GUI and Terminal-based UI are correct.
+
+   For some of our datasets, there were issues between the scraping and OUnit.
+   Since web scraping can involve a lot of redirects and is unreliable with its
+   speed, the more complex issues were causing issues with hanging in OUnit. As
+   such, these datasets were left out of our fetch tests below. Instead, they
+   were manually and thoroughly tested using utop, the repl, and the gui.
+
+   Additionally, the export feature was not automatically tested since it
+   requires the creation of the file. It was thoroughly manually tested with
+   utop, the repl interface, and the gui interface. *)
+
+(*****************************************************************)
 
 let senate_members_url =
   "https://www.senate.gov/general/contact_information/senators_cfm.xml"
@@ -104,6 +119,15 @@ let markdown_tests =
         "Lorem ipsum dolor sit amet" );
     ( "multiple identical tokens" >:: fun _ ->
       assert_equal (replace_snippet "{snippet} {snippet}" d) "snip snip" );
+    ( "read/writing from test data" >:: fun _ ->
+      let st = Unix.time () |> string_of_float in
+      assert_equal
+        (write_str "data/test" st;
+         string_of_file "data/test")
+        st );
+    ( "Reading a nonexistent file" >:: fun _ ->
+      assert_raises (Sys_error "data/nonexistent: No such file or directory")
+        (fun () -> string_of_file "data/nonexistent") );
   ]
 
 let make_fetch_test (name : string) (command : command) (result : string list) =
@@ -205,6 +229,47 @@ let csv_tests =
     ( "Bad header (should raise exception)" >:: fun _ ->
       assert_raises (Invalid_argument "Csv_parser.row") (fun () -> row "1,2" [])
     );
+    ( "Nominate typical case" >:: fun _ ->
+      assert_equal (DWNominate.exec "SANDERS, Bernard") ~-.0.538 );
+    ( "Nominate nonexistent senator" >:: fun _ ->
+      assert_raises UnknownSenator (fun () ->
+          DWNominate.exec "nonexistent senator") );
+  ]
+
+let type_tests =
+  (* glass box tests for (the relatively simple) compilation units that
+     primarily exist to represent different abstract types *)
+  [
+    ( "Member type test" >:: fun _ ->
+      let open Member in
+      let m = make ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k") in
+      assert_bool "checking all member fields"
+        (full_name m = "a"
+        && last_name m = "b"
+        && first_name m = "c"
+        && party m = "d"
+        && state m = "e"
+        && address m = "f"
+        && phone m = "g"
+        && email m = "h"
+        && website m = "i"
+        && class_num m = "j"
+        && biographical_id m = "k") );
+    ( "Finance type test" >:: fun _ ->
+      let open Finance in
+      let m = make ("a", "b", "c") in
+      assert_bool "checking all finance fields"
+        (receipts m = "a"
+        && total_contributions m = "b"
+        && indiv_contributions m = "c") );
+    ( "Stockinfo type test" >:: fun _ ->
+      let open Stockinfo in
+      let m = make ("a", "b", "c", "d") in
+      assert_bool "checking all stockinfo fields"
+        (company m = "a"
+        && transaction_type m = "b"
+        && amount m = "c"
+        && trade_date m = "d") );
   ]
 
 let tests =
@@ -217,6 +282,7 @@ let tests =
            fetch_tests;
            csv_tests;
            map_tests;
+           type_tests;
          ]
 
 let _ = run_test_tt_main tests
