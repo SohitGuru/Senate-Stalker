@@ -77,6 +77,22 @@ let execute (cmd : command) =
           in
           let open Csv_parser in
           [ DWNominate.exec sen |> string_of_float; DWNominate.explanation ]
+      | Finance -> (
+          try
+            let f =
+              Scraper.FEC.exec
+                ( find_member y |> fun m ->
+                  Member.last_name m ^ ", " ^ Member.first_name m
+                  |> String.uppercase_ascii )
+            in
+            let open Finance in
+            [
+              "Total Campaign Receipts: " ^ receipts f;
+              "Total Contributions Received: " ^ total_contributions f;
+              "Total Individual Contributions Received: "
+              ^ indiv_contributions f;
+            ]
+          with UnknownSenator -> raise UnexpectedError)
     end
   | Export (path, sen) ->
       export path sen;

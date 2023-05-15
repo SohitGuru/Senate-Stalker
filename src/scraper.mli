@@ -25,3 +25,5 @@ module Committees :
     of Senator [senator]. [senator] should be formatted last name, then a comma,
     then the first name, and then the middle initial. Raises [UnknownSenator] if
     there is an error finding the senator or their committees.*)
+
+module FEC : Parser with type return = Finance.t with type input = string

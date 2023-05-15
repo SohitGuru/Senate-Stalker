@@ -11,6 +11,7 @@ type field =
   | Class
   | Committees
   | DWNom
+  | Finance
 
 type command =
   | Fetch of field * arg_phrase
@@ -48,6 +49,7 @@ let fetch_field str =
   | "Class" -> Class
   | "Committees" -> Committees
   | "Nominate" -> DWNom
+  | "Finance" -> Finance
   | _ -> raise Invalid
 
 let fetch_path str =

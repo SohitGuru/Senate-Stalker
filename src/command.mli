@@ -16,6 +16,7 @@ type field =
   | Class
   | Committees
   | DWNom
+  | Finance
 
 (** [command] represents the command once parsed *)
 type command =

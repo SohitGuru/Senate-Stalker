@@ -127,3 +127,51 @@ module Committees :
     let _, lst = action_runner (committees senator) in
     lst
 end
+
+module FEC : Parser with type return = Finance.t with type input = string =
+struct
+  open Soup
+
+  type input = string
+  type return = Finance.t
+
+  let url = "https://www.fec.gov"
+  let search = "/data/search/?search="
+
+  let search sen =
+    let open Page in
+    let spaces_handled = String.split_on_char ' ' sen |> String.concat "+" in
+    Agent.get (url ^ search ^ spaces_handled) >|= fun res ->
+    res |> Agent.HttpResponse.page |> links_with "a"
+    |> filter (fun x ->
+           match Link.text x with
+           | Some s -> s = sen
+           | None -> false)
+    |> filter (fun x -> String.get (Link.href x) 16 = 'S')
+    >/> first |> Link.href
+
+  let fetch_total_receipts s =
+    s $ "span[data-term=\"total receipts\"]" >/> parent >/> next_element
+    >/> leaf_text |> String.trim
+
+  let fetch_total_contributions s =
+    s $ "td:contains(\"Total contributions\")" >/> next_element >/> leaf_text
+    |> String.trim
+
+  let fetch_indiv_contributions s =
+    s $ "td:contains(\"Total individual contributions\")" >/> next_element
+    >/> leaf_text |> String.trim
+
+  let fetch data =
+    let url = url ^ data ^ "/" in
+    Agent.get url >|= fun res ->
+    let s = res |> Agent.HttpResponse.page |> Page.soup in
+    ( fetch_total_receipts s,
+      fetch_total_contributions s,
+      fetch_indiv_contributions s )
+
+  let exec senator =
+    let _, d = action_runner (search senator) in
+    let _, tup = action_runner (fetch d) in
+    Finance.make tup
+end

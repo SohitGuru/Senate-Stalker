@@ -1,4 +1,5 @@
 (** Representation of a member and their basic information *)
+
 type t
 (** abstract type representing members *)
 
