@@ -21,12 +21,16 @@ git-repo: "https://github.coecis.cornell.edu/sg857/Keaton-Camels"
 demo-video-url: ""
 
 desc: >
-  Our project provides information to a client about a given United States 
-  senator! Information about the senator such as their Party, State, Address, Phone Number,
-  Email, Website, and Committees they are part of will be fetched and provided to the client.
-  Most of the information we will retrieve for the specified politician will involve 
-  us utilizing OCaml web scraping libraries (Mechaml) and working with JSON. 
-  Essentially, the program will put the information on the politician into a markdown file. 
-  
-  A standard interface between the client and terminal is used. However, we plan on
-  building and implementing a GUI involving the Senator and their associated information soon!
+  Our project provides information to a user about any given United States 
+  senator! Information about the senator such as their Party, State, Address, 
+  Phone Number, Email, Website, and Committees they are part of will be fetched 
+  and provided to the client. We also have a Stocks and Nominate feature, which 
+  retrieves all of the stock investments and the political leaning of a senator 
+  respectively. Most of the information we will retrieve for the specified 
+  politician will involve us utilizing OCaml web scraping libraries
+  (Mechaml) and working with JSON. Moreover, clients are able to save the
+  information on a senator of their choosing into a markdown file, if they want.
+  We have a GUI as well created by using Lablgtk2 and a terminal-based UI; 
+  both of which, the user has the option to pick to run the program. Our GUI 
+  provides a helpful guide into how our program works and brief explanation of 
+  the senate elections. 
