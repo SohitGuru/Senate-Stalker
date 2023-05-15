@@ -19,14 +19,16 @@ let scuffedwidth_of_resultlabel = 975
 let scuffedheight_of_resultlabel = 225
 let normalwidth_of_resultlabel = 400
 let normalheight_of_resultlabel = 200
-let padding_of_button = 5
 let spacing_between_boxes = 10
+let spacing_between_entry_and_button = 20
 let previous_texts = ref []
 let current_index = ref (-1)
 let width_of_historydialog = 300
 let height_of_historydialog = 250
-let height_of_erasedialog = 75
 let width_of_erasedialog = 350
+let height_of_erasedialog = 75
+let width_of_senatordialog = 350
+let height_of_senatordialog = 315
 
 (* Form of history; if you press the up key, you get your previous text entries
    you wrote. Press down to view more recent previous entries. *)
@@ -240,18 +242,94 @@ let check_string str =
   then true
   else false
 
+let button_callback (entry : GEdit.entry) (result_label : GMisc.label) () =
+  let text1 = entry#text in
+  if text1 <> "" && text1 <> "Clear" then
+    previous_texts := List.append !previous_texts [ text1 ];
+  result_label#set_text
+    (if text1 = "List" || check_string text1 then (
+     result_label#misc#modify_font_by_name "Serif 16.5";
+     result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
+       ~height:scuffedheight_of_resultlabel ();
+     handle text1)
+    else if text1 = "Clear" (* Clear all search results and entry text *) then (
+      result_label#misc#modify_font_by_name "Serif 24";
+      result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
+        ~height:normalheight_of_resultlabel ();
+      "")
+    else (
+      result_label#misc#modify_font_by_name "Serif 24";
+      result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
+        ~height:normalheight_of_resultlabel ();
+      handle text1));
+  if
+    result_label#text <> "Invalid Senator"
+    && result_label#text <> "Invalid argument"
+  then (* Clear the entry widget *)
+    entry#set_text ""
+
+(* Capitalize the beginning of a string. *)
+let capitalize entry =
+  let text = entry#text in
+  match String.length text with
+  | 0 -> () (* Empty entry, nothing to capitalize *)
+  | _ ->
+      let capitalized_text = String.capitalize_ascii text in
+      entry#set_text capitalized_text
+
 (* Scales image according to dimensions specified. *)
 let scale_pixbuf pixbuf width height =
   let new_pixbuf = GdkPixbuf.create ~width ~height ~has_alpha:true () in
   GdkPixbuf.scale ~dest:new_pixbuf ~width ~height ~interp:`BILINEAR pixbuf;
   new_pixbuf
 
+let display_popup s =
+  (* create a popup with the text s *)
+  let dialog =
+    GWindow.message_dialog ~message:s ~buttons:GWindow.Buttons.ok
+      ~message_type:`INFO ~destroy_with_parent:true ()
+  in
+  dialog#set_position `CENTER_ALWAYS;
+
+  ignore (dialog#run ());
+  dialog#destroy ()
+
+(* Popup after export to specify a senator. *)
+let get_senator_popup s =
+  let dialog =
+    GWindow.dialog ~title:"Provide a Senator Name!"
+      ~width:width_of_senatordialog ~height:height_of_senatordialog
+      ~destroy_with_parent:true ~position:`CENTER_ALWAYS ()
+  in
+  let entry = GEdit.entry ~width:width_of_entry ~height:height_of_entry () in
+  entry#misc#modify_font_by_name "Times New Roman 22";
+  let font_desc = Pango.Font.from_string "Georgia 24" in
+  let label = GMisc.label ~markup:"<b>Export</b>" () in
+  label#misc#modify_font font_desc;
+  let button = GButton.button () in
+  button#add label#coerce;
+  let vbox =
+    GPack.vbox ~packing:dialog#vbox#add
+      ~spacing:spacing_between_entry_and_button ()
+  in
+  vbox#add entry#coerce;
+  vbox#add button#coerce;
+
+  ignore
+    (button#connect#clicked ~callback:(fun () ->
+         "Export " ^ s ^ "/senstalk.md " ^ entry#text |> handle |> display_popup));
+  ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
+  ignore (entry#connect#changed ~callback:(fun () -> capitalize entry));
+
+  dialog#show ();
+  ignore (dialog#run ());
+  dialog#destroy ()
+
 let create_export_popup () =
   let selected w () =
     match w#filename with
     | Some s ->
-        (* Executor.execute (Export (s ^ "/senstalk.md", [ "Sanders"; "Bernard"
-           ])) *)
+        get_senator_popup s;
         print_endline s
     (* TODO change this*)
     | None -> ()
@@ -261,7 +339,7 @@ let create_export_popup () =
      ~border_width:10 () in *)
   print_endline "Export";
   widget#add_select_button_stock `OK `OPEN;
-  widget#connect#current_folder_changed (selected widget) |> ignore;
+  widget#connect#destroy (selected widget) |> ignore;
   (* ~callback:(selected widget) *)
   (* ~callback:(selected widget) *)
   widget#show ();
@@ -389,14 +467,7 @@ let create_window () =
   ignore (entry#event#connect#key_press ~callback:(on_key_press entry));
 
   (* Capitalize first letter of input *)
-  ignore
-    (entry#connect#changed ~callback:(fun () ->
-         let text = entry#text in
-         match String.length text with
-         | 0 -> () (* Empty entry, nothing to capitalize *)
-         | _ ->
-             let capitalized_text = String.capitalize_ascii text in
-             entry#set_text capitalized_text));
+  ignore (entry#connect#changed ~callback:(fun () -> capitalize entry));
 
   (* Shows a tool tip on the entry field *)
   let tooltips = GData.tooltips () in
@@ -428,36 +499,10 @@ let create_window () =
   result_label#set_selectable true;
   result_label#set_justify `CENTER;
 
-  let button_callback : unit -> unit =
-   fun () ->
-    let text1 = entry#text in
-    if text1 <> "" && text1 <> "Clear" then
-      previous_texts := List.append !previous_texts [ text1 ];
-    result_label#set_text
-      (if text1 = "List" || check_string text1 then (
-       result_label#misc#modify_font_by_name "Serif 16.5";
-       result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
-         ~height:scuffedheight_of_resultlabel ();
-       handle text1)
-      else if text1 = "Clear" (* Clear all search results and entry text *) then (
-        result_label#misc#modify_font_by_name "Serif 24";
-        result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
-          ~height:normalheight_of_resultlabel ();
-        "")
-      else (
-        result_label#misc#modify_font_by_name "Serif 24";
-        result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
-          ~height:normalheight_of_resultlabel ();
-        handle text1));
-    if
-      result_label#text <> "Invalid Senator"
-      && result_label#text <> "Invalid argument"
-    then (* Clear the entry widget *)
-      entry#set_text ""
-  in
-
   (* Connect the button click event to the callback function *)
-  ignore (button#connect#clicked ~callback:(fun () -> button_callback ()));
+  ignore
+    (button#connect#clicked ~callback:(fun () ->
+         button_callback entry result_label ()));
 
   (* Function to allow enter key activate button press *)
   ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
