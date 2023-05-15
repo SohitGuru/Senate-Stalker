@@ -26,6 +26,7 @@ let current_index = ref (-1)
 let width_of_historydialog = 300
 let height_of_historydialog = 250
 let height_of_erasedialog = 75
+let width_of_erasedialog = 350
 
 (* Form of history; if you press the up key, you get your previous text entries
    you wrote. Press down to view more recent previous entries. *)
@@ -52,6 +53,7 @@ let on_key_press entry event : bool =
 let create_aboutpopup_dialog () =
   let dialog =
     GWindow.about_dialog ~name:"Senate Stalker" ~title:"About Us"
+      ~destroy_with_parent:true
       ~authors:
         [
           "Anya Khanna (netid: ak2243)";
@@ -80,7 +82,8 @@ let create_popup_dialog () =
   let dialog =
     GWindow.message_dialog
       ~message:"An unexpected error occurred while web scraping."
-      ~buttons:GWindow.Buttons.close ~message_type:`ERROR ()
+      ~buttons:GWindow.Buttons.close ~message_type:`ERROR
+      ~destroy_with_parent:true ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
@@ -97,7 +100,8 @@ let create_helppopup_dialog () =
          field specifying what it is you want to know about the senator. \
          After, if you want to save the information you found in a .md file, \
          simply write Export followed by the pathname and name of senator. "
-      ~buttons:GWindow.Buttons.ok ~message_type:`INFO ()
+      ~buttons:GWindow.Buttons.ok ~message_type:`INFO ~destroy_with_parent:true
+      ()
   in
   dialog#set_position `CENTER_ALWAYS;
 
@@ -134,7 +138,8 @@ let erase_history () : bool =
 (* Erase history pop-up. *)
 let create_erasehistory_dialog () =
   let dialog =
-    GWindow.dialog ~position:`CENTER_ALWAYS ~height:height_of_erasedialog ()
+    GWindow.dialog ~position:`CENTER_ALWAYS ~width:width_of_erasedialog
+      ~height:height_of_erasedialog ~destroy_with_parent:true ()
   in
   let label = GMisc.label () in
   if erase_history () then begin
@@ -156,7 +161,9 @@ let create_erasehistory_dialog () =
 let create_history_dialog () =
   let dialog =
     GWindow.dialog ~title:"History" ~width:width_of_historydialog
-      ~height:height_of_historydialog ~position:`CENTER_ALWAYS ()
+      ~height:height_of_historydialog
+      ~icon:(GdkPixbuf.from_file "data/stalk.png")
+      ~destroy_with_parent:true ~position:`CENTER_ALWAYS ()
   in
   let label =
     GMisc.label ~text:(take_last_five !previous_texts |> to_bulleted_string) ()
@@ -193,6 +200,37 @@ let handle cmd =
   | Export (p, s) -> (
       try String.concat "\n" (Executor.execute (Export (p, s)))
       with _ -> "An error occured")
+
+(* Returns a string for today's date in MM/DD/YYYY *)
+let todays_date =
+  let now = Unix.localtime (Unix.time ()) in
+  let year = now.Unix.tm_year + 1900 in
+  let month = now.Unix.tm_mon + 1 in
+  let day = now.Unix.tm_mday in
+  Printf.sprintf "Today's Date:  %d/%d/%d" month day year
+
+(* Creates a pop-up on Senate Elections *)
+let create_senateelectionpopup_dialog () =
+  let dialog =
+    GWindow.message_dialog
+      ~message:
+        "United States senator elections are held every two years. During \
+         these elections, approximately one-third of the Senate seats are up \
+         for grabs. This means that out of the 100 total Senate seats, around \
+         33 seats are contested in each election cycle. These elections are \
+         usually held in November; the next election is set to be held on \
+         November 5, 2024 (11/05/2024)."
+      ~buttons:GWindow.Buttons.close ~message_type:`INFO
+      ~destroy_with_parent:true ()
+  in
+  dialog#set_position `CENTER_ALWAYS;
+
+  ignore (dialog#run ());
+  dialog#destroy ()
+
+let classonedate = [ `I ("1/3/2025", fun () -> ()) ]
+let classtwodate = [ `I ("1/3/2027", fun () -> ()) ]
+let classthreedate = [ `I ("1/3/2029", fun () -> ()) ]
 
 (* Checks if the command is Fetch Committees or not. *)
 let check_string str =
@@ -274,6 +312,25 @@ let create_window () =
       ];
 
   menu#set_border_width 1;
+
+  let datemenu =
+    GMenu.menu
+      ~packing:
+        (GMenu.menu_item ~right_justified:true ~label:todays_date
+           ~packing:menubar#append ())
+          #set_submenu
+      ()
+  in
+  GToolbox.build_menu datemenu
+    ~entries:
+      [
+        `M ("Class I: End Term", classonedate);
+        `M ("Class II: End Term", classtwodate);
+        `M ("Class III: End Term", classthreedate);
+        `S;
+        `I ("Election", create_senateelectionpopup_dialog);
+      ];
+  datemenu#misc#set_sensitive true;
 
   let _ =
     GMisc.image
