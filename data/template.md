@@ -10,3 +10,8 @@ Here is the information we have collected on the senator:
 - website: {website}
 - class: {class}
 - Committees: {committees}
+- Approval Rating: {approval 1}
+- State Partisan Leaning: {approval 2}
+- Ideology (DW-Nominate) : {nominate}
+- Finance: {bulleted finance}
+- Stock data: {bulleted stock}
