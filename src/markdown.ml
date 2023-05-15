@@ -20,13 +20,13 @@ let handle_part st open_delim d : string =
   if String.contains st open_delim then
     match String.split_on_char open_delim st with
     | [ preface; token ] -> (
-        try preface ^ Dictionary.find token d
+        try preface ^ List.assoc token d
         with Dictionary.NotFound -> preface ^ st)
     | _ -> failwith "Bad input: " ^ st
   else st
 
 let replace_snippet ?(open_delim = '{') ?(close_delim = '}') (o : string)
-    (d : (string, string) Dictionary.t) : string =
+    (d : (string * string) list) : string =
   match String.split_on_char close_delim o with
   | [] | [ _ ] -> o
   | h :: _ as lst ->

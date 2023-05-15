@@ -21,11 +21,11 @@ val replace_snippet :
   ?open_delim:char ->
   ?close_delim:char ->
   string ->
-  (string, string) Dictionary.t ->
+  (string * string) list ->
   string
 (** [replace_snippet ?open_delim:o ?close_delim:c original dictionary] replaces
-    a series of delimited tokens with given values. [dictionary] should map each
-    token to the value that should replace it. For each binding of a [token] to
-    a [replacement] in the map, every occurance of [o ^ token ^ c] in [original]
-    with [replacement]. By default, the open delimiter is ['{'] and the close
-    delimiter is ['}']. *)
+    a series of delimited tokens with given values. [dictionary] should be an
+    association list that maps each token to the value that should replace it.
+    For each binding of a [token] to a [replacement] in the map, every occurance
+    of [o ^ token ^ c] in [original] with [replacement]. By default, the open
+    delimiter is ['{'] and the close delimiter is ['}']. *)

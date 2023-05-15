@@ -93,12 +93,7 @@ let parse_tests =
   ]
 
 let markdown_tests =
-  let d =
-    Dictionary.(
-      empty
-      |> insert "name" "Gorg Abbott"
-      |> insert "word" "ipsum" |> insert "snippet" "snip")
-  in
+  let d = [ ("name", "Gorg Abbott"); ("word", "ipsum"); ("snippet", "snip") ] in
   let open Markdown in
   [
     ( "basic snippet replacement tests" >:: fun _ ->
@@ -182,7 +177,9 @@ let csv_tests =
     );
   ]
 
-(* let tests = "test suite for project" >::: List.flatten [ scraper_tests;
-   parse_tests; markdown_tests; fetch_tests; csv_tests ]
+let tests =
+  "test suite for project"
+  >::: List.flatten
+         [ scraper_tests; parse_tests; markdown_tests; fetch_tests; csv_tests ]
 
-   let _ = run_test_tt_main tests *)
+let _ = run_test_tt_main tests
