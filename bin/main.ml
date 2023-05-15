@@ -18,6 +18,7 @@ let help_message =
   \    Email\n\
   \    Website\n\
   \    Class\n\
+  \    Stocks\n\
   \    Nominate\n\
   \    Committees\n"
 

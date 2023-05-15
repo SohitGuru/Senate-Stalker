@@ -9,7 +9,7 @@ open Command
 
 (* Constants to avoid use of magic numbers*)
 let width_of_window = 1000
-let height_of_window = 750
+let height_of_window = 765
 let border_width_of_window = 2
 let width_of_button = 15
 let height_of_button = 30
@@ -38,7 +38,8 @@ let on_key_press entry event : bool =
   | 65362 (* GdkKeysyms._Up *) ->
       let num_entries = List.length !previous_texts in
       if num_entries > 0 then (
-        current_index := (!current_index - 1 + num_entries) mod num_entries;
+        current_index := (!current_index - 1) mod num_entries;
+        if !current_index < 0 then current_index := num_entries - 1;
         entry#set_text (List.nth !previous_texts !current_index));
       true
   | 65364 (* GdkKeysyms._Down *) ->
@@ -238,22 +239,32 @@ let classthreedate = [ `I ("1/3/2029", fun () -> ()) ]
 let check_string str =
   let prefix = "Fetch Committees" in
   let len_prefix = String.length prefix in
-  if String.length str >= len_prefix && String.sub str 0 len_prefix = prefix
+  let otherprefix = "Fetch Stocks" in
+  let len_otherprefix = String.length otherprefix in
+  if
+    (String.length str >= len_prefix && String.sub str 0 len_prefix = prefix)
+    || String.length str >= len_otherprefix
+       && String.sub str 0 len_otherprefix = otherprefix
   then true
   else false
 
-let button_callback (entry : GEdit.entry) (result_label : GMisc.label) () =
+let button_callback (entry : GEdit.entry) (result_label : GMisc.label)
+    (scrolled_window : GBin.scrolled_window) () =
   let text1 = entry#text in
   if text1 <> "" && text1 <> "Clear" then
     previous_texts := List.append !previous_texts [ text1 ];
   result_label#set_text
     (if text1 = "List" || check_string text1 then (
      result_label#misc#modify_font_by_name "Serif 16.5";
+     scrolled_window#misc#set_size_request ~width:scuffedwidth_of_resultlabel
+       ~height:scuffedheight_of_resultlabel ();
      result_label#misc#set_size_request ~width:scuffedwidth_of_resultlabel
        ~height:scuffedheight_of_resultlabel ();
      handle text1)
     else if text1 = "Clear" (* Clear all search results and entry text *) then (
       result_label#misc#modify_font_by_name "Serif 24";
+      scrolled_window#misc#set_size_request ~width:normalwidth_of_resultlabel
+        ~height:normalheight_of_resultlabel ();
       result_label#misc#set_size_request ~width:normalwidth_of_resultlabel
         ~height:normalheight_of_resultlabel ();
       "")
@@ -446,6 +457,7 @@ let create_window () =
         \    Email\n\
         \    Website\n\
         \    Class\n\
+        \    Stocks\n\
         \    Nominate\n\
         \    Committees\n"
       ~packing:vbox#add ()
@@ -491,20 +503,30 @@ let create_window () =
     ~text:"Click the button or press enter to process your command!"
     ~privat:"Private";
 
+  let scrolled_window =
+    GBin.scrolled_window ~packing:vbox#add ~width:normalwidth_of_resultlabel
+      ~height:normalheight_of_resultlabel ()
+  in
+  scrolled_window#set_hpolicy `AUTOMATIC;
+  scrolled_window#set_vpolicy `AUTOMATIC;
+  scrolled_window#set_shadow_type `OUT;
+
   let result_label =
     GMisc.label ~text:"" ~height:normalheight_of_resultlabel
-      ~width:normalwidth_of_resultlabel ~packing:vbox#add ()
+      ~width:normalwidth_of_resultlabel
+      ~packing:scrolled_window#add_with_viewport ()
   in
 
   result_label#misc#modify_font_by_name "Serif 24";
   result_label#set_line_wrap true;
   result_label#set_selectable true;
+  result_label#set_ellipsize `NONE;
   result_label#set_justify `CENTER;
 
   (* Connect the button click event to the callback function *)
   ignore
     (button#connect#clicked ~callback:(fun () ->
-         button_callback entry result_label ()));
+         button_callback entry result_label scrolled_window ()));
 
   (* Function to allow enter key activate button press *)
   ignore (entry#connect#activate ~callback:(fun () -> button#clicked ()));
