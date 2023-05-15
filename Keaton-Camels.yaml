@@ -21,16 +21,20 @@ git-repo: "https://github.coecis.cornell.edu/sg857/Keaton-Camels"
 demo-video-url: ""
 
 desc: >
-  Our project provides information to a user about any given United States 
-  senator! Information about the senator such as their Party, State, Address, 
-  Phone Number, Email, Website, and Committees they are part of will be fetched 
-  and provided to the client. We also have a Stocks and Nominate feature, which 
-  retrieves all of the stock investments and the political leaning of a senator 
-  respectively. Most of the information we will retrieve for the specified 
-  politician will involve us utilizing OCaml web scraping libraries
-  (Mechaml) and working with JSON. Moreover, clients are able to save the
-  information on a senator of their choosing into a markdown file, if they want.
-  We have a GUI as well created by using Lablgtk2 and a terminal-based UI; 
-  both of which, the user has the option to pick to run the program. Our GUI 
-  provides a helpful guide into how our program works and brief explanation of 
-  the senate elections. 
+  To many in the country, politics is a mystery—a passing hobby. A large reason for
+  this is that political information, especially information around the Senate, is 
+  incredibly hard to find, parse, and understand. As such, we hope to create a tool 
+  that allows users to see the data they want on any current U.S. Senator—all easily 
+  accessible, understandable, and in one place. Thus, our project provides 
+  information to a user about any given United States senator! Information 
+  about the senator such as their Party, State, Address, Phone Number, Email, 
+  Website, and Committees they are part of will be fetched and provided to the client
+  when asked. We also have a Stocks and Nominate feature, which retrieves all
+  of the stock investments and the political leaning of a senator. 
+  Moreover, clients are able to save the information on a senator of their 
+  choosing into a markdown file, if they so wish. Most of the information we retrieved for a 
+  senator involved us using OCaml web scraping libraries (Mechaml) and working 
+  with JSON. We have a GUI as well, created by using Lablgtk2,and a terminal-based UI, 
+  developed by using ANSI-terminal; both of which, the user has the option to pick in order
+  to run the program. Our GUI provides a helpful guide into how our program works and
+  a brief explanation of the senate elections too! 
