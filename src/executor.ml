@@ -41,15 +41,20 @@ let export (path : string) (sen : arg_phrase) =
   List.map (fun st -> Markdown.replace_snippet st d) originals
   |> List.rev |> Markdown.write_list path
 
+open Stockinfo
+
 let rec format_stocks_list stocks_list =
   match stocks_list with
   | [] -> []
   | h :: t ->
-      ("Name: " ^ Stockinfo.company h ^ "\nType: "
-      ^ Stockinfo.transaction_type h
-      ^ "\nAmount: " ^ Stockinfo.amount h ^ "\nTrade date: "
-      ^ Stockinfo.trade_date h ^ "\n---\n")
-      :: format_stocks_list t
+      [
+        "Name: " ^ Stockinfo.company h;
+        "Type: " ^ Stockinfo.transaction_type h;
+        "Amount: " ^ Stockinfo.amount h;
+        "Trade date: " ^ Stockinfo.trade_date h;
+        "---";
+      ]
+      @ format_stocks_list t
 
 let execute (cmd : command) =
   match cmd with
