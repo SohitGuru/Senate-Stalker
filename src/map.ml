@@ -21,7 +21,7 @@ let size { hash; arr; size } = size
 
 let make h c =
   if c > 0 then { hash = h; arr = Array.make c []; size = 0 }
-  else raise (Invalid_argument "capacity must be positive for Map.make")
+  else raise (Invalid_argument "Map.make")
 
 let resize_threshold = 2
 
@@ -65,8 +65,12 @@ let get (k : 'k) { hash; arr; size } =
 let remove k m =
   let rec rem_bucket k b =
     match b with
-    | [] -> ()
-    | (k', _) :: t -> if k = k' then m.size <- m.size - 1 else rem_bucket k t
+    | [] -> []
+    | (k', v) :: t ->
+        if k = k' then (
+          m.size <- m.size - 1;
+          t)
+        else (k', v) :: rem_bucket k t
   in
   let i = m.hash k mod Array.length m.arr in
-  rem_bucket k m.arr.(i)
+  m.arr.(i) <- rem_bucket k m.arr.(i)

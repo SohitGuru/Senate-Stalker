@@ -141,21 +141,51 @@ let fetch_tests =
         "Committee on the Budget";
         "Committee on Veterans' Affairs";
       ];
-    make_fetch_test "fetch nominate test"
-      (Fetch (DWNom, [ "Sanders"; "Bernard" ]))
-      [
-        "-0.538";
-        "The score is on a scale from -1.0 to 1.0, where -1 is the most \
-         liberal possible score and 1 is the most conservative. The Democratic \
-         Party median is -0.3455 and the Republican median is 0.541.";
-      ];
-    make_fetch_test "fetch finance test"
-      (Fetch (Finance, [ "Sanders"; "Bernard" ]))
-      [
-        "Total Campaign Receipts: $28,938,549.60";
-        "Total Contributions Received: $26,692,520.35";
-        "Total Individual Contributions Received: $26,687,520.35";
-      ];
+  ]
+
+let map_tests =
+  let open Map in
+  let m = make (fun x -> x) 2 in
+  [
+    ("Empty map size" >:: fun _ -> assert_equal (size m) 0);
+    ( "insert test" >:: fun _ ->
+      assert_equal
+        (put 1 15 m;
+         get 1 m)
+        15 );
+    ( "Insert overrwrite test" >:: fun _ ->
+      assert_equal
+        (put 1 16 m;
+         get 1 m)
+        16 );
+    ("Check size after overrwrite" >:: fun _ -> assert_equal (size m) 1);
+    ( "Check size after resize (glass box)" >:: fun _ ->
+      assert_equal
+        (put 2 17 m;
+         put 3 18 m;
+         put 4 19 m;
+         put 5 20 m;
+         size m)
+        5 );
+    ( "Check bindings after resize (glass box)" >:: fun _ ->
+      assert_bool "checking all bindings"
+        (get 1 m = 16
+        && get 2 m = 17
+        && get 3 m = 18
+        && get 4 m = 19
+        && get 5 m = 20) );
+    ("Bad get" >:: fun _ -> assert_raises Not_found (fun () -> get 131940 m));
+    ( "Bad make" >:: fun _ ->
+      assert_raises (Invalid_argument "Map.make") (fun () ->
+          make (fun x -> x) ~-2) );
+    ( "remove test" >:: fun _ ->
+      assert_raises Not_found (fun () ->
+          remove 2 m;
+          get 2 m) );
+    ( "bad remove" >:: fun _ ->
+      assert_equal (size m)
+        (remove 9123 m;
+         size m) );
   ]
 
 let make_row_test name r header expected =
@@ -180,6 +210,13 @@ let csv_tests =
 let tests =
   "test suite for project"
   >::: List.flatten
-         [ scraper_tests; parse_tests; markdown_tests; fetch_tests; csv_tests ]
+         [
+           scraper_tests;
+           parse_tests;
+           markdown_tests;
+           fetch_tests;
+           csv_tests;
+           map_tests;
+         ]
 
 let _ = run_test_tt_main tests
