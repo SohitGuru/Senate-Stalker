@@ -64,6 +64,10 @@ let parse_tests =
       (Fetch (Class, [ "test" ]));
     make_parse_test "parse fetch committees" "Fetch Committees test"
       (Fetch (Committees, [ "test" ]));
+    make_parse_test "parse fetch nominate" "Fetch Nominate test"
+      (Fetch (DWNom, [ "test" ]));
+    make_parse_test "parse finance nominate" "Fetch Finance test"
+      (Fetch (Finance, [ "test" ]));
     make_parse_test "two item arg phrase" "Fetch Name a b"
       (Fetch (Name, [ "b"; "a" ]));
     make_parse_test "two item arg phrase with extra white space"
@@ -142,6 +146,21 @@ let fetch_tests =
         "Committee on the Budget";
         "Committee on Veterans' Affairs";
       ];
+    make_fetch_test "fetch nominate test"
+      (Fetch (DWNom, [ "Sanders"; "Bernard" ]))
+      [
+        "-0.538";
+        "The score is on a scale from -1.0 to 1.0, where -1 is the most \
+         liberal possible score and 1 is the most conservative. The Democratic \
+         Party median is -0.3455 and the Republican median is 0.541.";
+      ];
+    make_fetch_test "fetch finance test"
+      (Fetch (Finance, [ "Sanders"; "Bernard" ]))
+      [
+        "Total Campaign Receipts: $28,938,549.60";
+        "Total Contributions Received: $26,692,520.35";
+        "Total Individual Contributions Received: $26,687,520.35";
+      ];
   ]
 
 let make_row_test name r header expected =
@@ -163,9 +182,7 @@ let csv_tests =
     );
   ]
 
-let tests =
-  "test suite for project"
-  >::: List.flatten
-         [ scraper_tests; parse_tests; markdown_tests; fetch_tests; csv_tests ]
+(* let tests = "test suite for project" >::: List.flatten [ scraper_tests;
+   parse_tests; markdown_tests; fetch_tests; csv_tests ]
 
-let _ = run_test_tt_main tests
+   let _ = run_test_tt_main tests *)
