@@ -185,3 +185,82 @@ struct
       dict := Dictionary.insert senator ret !dict;
       ret
 end
+
+open Stockinfo
+
+module Stocks :
+  Parser with type return = Stockinfo.t list with type input = string = struct
+  let url = "https://www.quiverquant.com/congresstrading/politician/"
+
+  type return = Stockinfo.t list
+  type input = string
+
+  open Soup
+
+  (*[fill_spaces] takes an input string and returns that string with "%20"
+    replacing every space*)
+  let rec fill_spaces_rec lst =
+    match lst with
+    | [] -> ""
+    | h :: t -> h ^ "%20" ^ fill_spaces_rec t
+
+  let fill_spaces str = String.split_on_char ' ' str |> fill_spaces_rec
+
+  let rec remove_leading_spaces str =
+    if String.length str >= 1 && str.[0] = ' ' then
+      remove_leading_spaces (String.sub str 1 (String.length str - 1))
+    else str
+
+  let eval_node nd =
+    let spans = nd $$ "span" |> to_list in
+    let spans_eval span_num =
+      remove_leading_spaces
+        (List.nth
+           (String.split_on_char '\n' (List.nth spans span_num |> to_string))
+           1)
+    in
+    let company =
+      spans_eval 1 ^ ", which is an asset of type " ^ spans_eval 2
+    in
+    let transaction_type = spans_eval 3 in
+    let amount = spans_eval 4 in
+    let a_list = nd $$ "span" |> to_list in
+    let trade_date =
+      remove_leading_spaces
+        (List.nth
+           (String.split_on_char '\n' (List.nth a_list 4 |> to_string))
+           1)
+    in
+    Stockinfo.make (company, transaction_type, amount, trade_date)
+
+  let rec make_trades_list_rec tbody_filtered =
+    match tbody_filtered with
+    | [] -> []
+    | h :: t -> eval_node h :: make_trades_list_rec t
+
+  let make_trades_list senator_page =
+    let tbody = senator_page $ "tbody" in
+    let tbody_filtered =
+      List.filter
+        (fun x -> String.sub (x |> to_string) 0 1 <> "\n")
+        (tbody |> children |> to_list)
+    in
+    make_trades_list_rec tbody_filtered
+
+  let trades senator =
+    let formatted_url = url ^ fill_spaces senator ^ "?" in
+    let senator_page = page_of_url formatted_url >|= Page.soup in
+    senator_page >|= fun x ->
+    if
+      x $? "p:contains(\"No trading activity found for this politician.\")"
+      = None
+    then []
+    else make_trades_list x
+  (*if senator_page $ "p:contains(\"No trading activity found for this
+    politician.\")" then "No trading activity found for this politician." else
+    failwith "Unimplemented"*)
+
+  let exec senator =
+    let _, lst = action_runner (trades senator) in
+    lst
+end
