@@ -20,6 +20,7 @@ let help_message =
   \    Class\n\
   \    Stocks\n\
   \    Nominate\n\
+  \    Approval\n\
   \    Committees\n"
 
 let prompt = "> "

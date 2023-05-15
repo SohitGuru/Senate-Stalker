@@ -248,7 +248,7 @@ let button_callback (entry : GEdit.entry) (result_label : GMisc.label)
   previous_texts := List.append !previous_texts [ text1 ];
   result_label#set_text
     (if text1 = "List" || check_string text1 then (
-     result_label#misc#modify_font_by_name "Serif 16.5";
+     result_label#misc#modify_font_by_name "Serif 22";
      handle text1)
     else if text1 = "Clear" (* Clear all search results and entry text *) then (
       result_label#misc#modify_font_by_name "Serif 24";
@@ -448,6 +448,7 @@ let create_window () =
         \    Class\n\
         \    Stocks\n\
         \    Nominate\n\
+        \    Approval\n\
         \    Committees\n"
       ~packing:vbox#add ()
   in
