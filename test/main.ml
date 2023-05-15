@@ -81,8 +81,12 @@ let parse_tests =
       (Fetch (Committees, [ "test" ]));
     make_parse_test "parse fetch nominate" "Fetch Nominate test"
       (Fetch (DWNom, [ "test" ]));
-    make_parse_test "parse finance nominate" "Fetch Finance test"
+    make_parse_test "parse fetch finance" "Fetch Finance test"
       (Fetch (Finance, [ "test" ]));
+    make_parse_test "parse fetch approval" "Fetch Approval test"
+      (Fetch (Approval, [ "test" ]));
+    make_parse_test "parse stocks approval" "Fetch Stocks test"
+      (Fetch (Stocks, [ "test" ]));
     make_parse_test "two item arg phrase" "Fetch Name a b"
       (Fetch (Name, [ "b"; "a" ]));
     make_parse_test "two item arg phrase with extra white space"
@@ -165,6 +169,44 @@ let fetch_tests =
         "Committee on the Budget";
         "Committee on Veterans' Affairs";
       ];
+    make_fetch_test "fetch committees test"
+      (Fetch (Committees, [ "Warren"; "Elizabeth" ]))
+      [
+        "Committee on Armed Services";
+        "Committee on Banking, Housing, and Urban Affairs";
+        "Committee on Finance";
+        "Special Committee on Aging";
+      ];
+    ( "fetch approval test" >:: fun _ ->
+      assert_equal
+        (Executor.execute (Fetch (Approval, [ "Sanders"; "Bernard" ]))
+        |> List.hd)
+        "Approval Rating: +29" );
+    ( "auxiliary approval test" >:: fun _ ->
+      assert_equal
+        (Executor.execute (Fetch (Approval, [ "Warren"; "Elizabeth" ]))
+        |> List.hd)
+        "Approval Rating: +8" );
+    ( "fetch nominate test" >:: fun _ ->
+      assert_equal
+        (Executor.execute (Fetch (DWNom, [ "Sanders"; "Bernard" ])) |> List.hd)
+        "-0.538" );
+    ( "auxiliary nominate test" >:: fun _ ->
+      assert_equal
+        (Executor.execute (Fetch (DWNom, [ "Warren"; "Elizabeth" ])) |> List.hd)
+        "-0.751" );
+    ( "fetch nonexistent senator name" >:: fun _ ->
+      assert_raises BadArgument (fun () ->
+          Executor.execute (Fetch (Name, [ "nonexistent senator" ]))) );
+    ( "fetch nonexistent senator committees" >:: fun _ ->
+      assert_raises BadArgument (fun () ->
+          Executor.execute (Fetch (Committees, [ "nonexistent senator" ]))) );
+    ( "fetch nonexistent senator approval" >:: fun _ ->
+      assert_raises BadArgument (fun () ->
+          Executor.execute (Fetch (Approval, [ "nonexistent senator" ]))) );
+    ( "fetch nonexistent senator nominate" >:: fun _ ->
+      assert_raises BadArgument (fun () ->
+          Executor.execute (Fetch (DWNom, [ "nonexistent senator" ]))) );
   ]
 
 let map_tests =
