@@ -39,7 +39,7 @@ let export (path : string) (sen : arg_phrase) =
   in
   let originals = Markdown.list_of_file "data/template.md" in
   List.map (fun st -> Markdown.replace_snippet st d) originals
-  |> List.rev |> Markdown.write_list path
+  |> Markdown.write_list path
 
 open Stockinfo
 
